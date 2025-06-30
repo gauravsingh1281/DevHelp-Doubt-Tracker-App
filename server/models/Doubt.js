@@ -9,14 +9,27 @@ const doubtSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  screenshot: {
+    type: String,
+    default: null,
+  },
   status: {
     type: String,
     enum: ["open", "resolved"],
     default: "open",
   },
-  user: {
+  student: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User ",
+    ref: "User",
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 const Doubt = mongoose.model("Doubt", doubtSchema);

@@ -1,9 +1,14 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-  username: {
+  name: {
     type: String,
     required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
   },
   password: {
     type: String,
@@ -13,6 +18,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["student", "mentor"],
     default: "student",
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 const User = mongoose.model("User", userSchema);
