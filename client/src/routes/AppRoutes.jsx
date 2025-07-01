@@ -3,6 +3,7 @@ import Register from "../pages/Register";
 import Login from "../pages/Login";
 import ProtectedRoute from "./ProtectedRoute";
 import CreateDoubt from "../pages/CreateDoubt";
+import MyDoubts from "../pages/MyDoubts";
 const AppRoutes = () => {
   return (
     <Routes>
@@ -14,6 +15,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <CreateDoubt />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/doubts/my"
+        element={
+          <ProtectedRoute>
+            <MyDoubts />
           </ProtectedRoute>
         }
       />
