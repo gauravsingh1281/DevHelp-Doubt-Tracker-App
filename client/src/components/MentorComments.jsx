@@ -12,7 +12,7 @@ const MentorComments = ({ doubtId }) => {
       const res = await apiInstance.get(`/comments/${doubtId}`);
       setComments(res.data);
     } catch (err) {
-      toast.error("Failed to fetch comments");
+      toast.error("Failed to fetch mentor comments");
     } finally {
       setLoading(false);
     }
@@ -22,10 +22,11 @@ const MentorComments = ({ doubtId }) => {
     fetchComments();
   }, [doubtId]);
 
-  if (loading) return <p className="text-gray-400">Loading comments...</p>;
+  if (loading)
+    return <p className="text-gray-400 text-sm">Loading comments...</p>;
 
   return (
-    <ul className="text-sm text-gray-800 list-disc list-inside space-y-1">
+    <ul className="list-disc list-inside space-y-1 text-sm text-gray-800">
       {comments.length > 0 ? (
         comments.map((c) => (
           <li key={c._id}>
@@ -33,7 +34,7 @@ const MentorComments = ({ doubtId }) => {
           </li>
         ))
       ) : (
-        <p className="text-gray-500 italic">No comments yet.</p>
+        <p className="italic text-gray-500">No mentor replies yet.</p>
       )}
     </ul>
   );

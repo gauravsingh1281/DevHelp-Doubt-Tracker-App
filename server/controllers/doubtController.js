@@ -1,4 +1,5 @@
 import Doubt from "../models/Doubt.js";
+import Comment from "../models/Comment.js";
 
 export const createDoubt = async (req, res) => {
   try {
@@ -23,7 +24,19 @@ export const getMyDoubts = async (req, res) => {
     const doubts = await Doubt.find({ student: req.user.id }).sort({
       createdAt: -1,
     });
-    res.json(doubts);
+
+    // Get comment counts for each doubt
+    const doubtsWithCommentCount = await Promise.all(
+      doubts.map(async (doubt) => {
+        const commentCount = await Comment.countDocuments({ doubt: doubt._id });
+        return {
+          ...doubt.toObject(),
+          commentCount,
+        };
+      })
+    );
+
+    res.json(doubtsWithCommentCount);
   } catch (err) {
     res.status(500).json({ msg: "Error fetching doubts", error: err.message });
   }
