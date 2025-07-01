@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import apiInstance from "../../api/apiInstance";
+import apiInstance from "../api/apiInstance";
 
 const CreateDoubt = () => {
   const navigate = useNavigate();

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import apiInstance from "../../api/apiInstance";
+import apiInstance from "../api/apiInstance";
 import MentorComments from "../components/MentorComments";
 
 const MyDoubts = () => {

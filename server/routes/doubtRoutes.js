@@ -6,6 +6,7 @@ import {
   updateDoubt,
   deleteDoubt,
   markDoubtResolved,
+  toggleDoubtStatus,
 } from "../controllers/doubtController.js";
 
 import { protect, isStudent, isMentor } from "../middlewares/authMiddleware.js";
@@ -21,5 +22,8 @@ router.patch("/:id/resolve", protect, isStudent, markDoubtResolved);
 
 // Mentor Routes
 router.get("/", protect, isMentor, getAllDoubts);
+
+// Shared Routes (Students and Mentors)
+router.patch("/:id/toggle-status", protect, toggleDoubtStatus);
 
 export default router;

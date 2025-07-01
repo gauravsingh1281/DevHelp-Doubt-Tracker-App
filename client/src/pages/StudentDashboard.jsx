@@ -1,11 +1,13 @@
 // imports
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import apiInstance from "../../api/apiInstance";
+import apiInstance from "../api/apiInstance";
+import { AuthContext } from "../context/AuthContext";
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const [doubts, setDoubts] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedDoubt, setSelectedDoubt] = useState(null);
@@ -91,14 +93,17 @@ const StudentDashboard = () => {
     }
   };
 
-  const handleResolve = async () => {
+  const handleToggleResolve = async () => {
     try {
-      await apiInstance.patch(`/doubts/${selectedDoubt._id}/resolve`);
-      toast.success("Doubt marked as resolved");
+      await apiInstance.patch(`/doubts/${selectedDoubt._id}/toggle-status`);
+      const newStatus =
+        selectedDoubt.status === "resolved" ? "open" : "resolved";
+      const statusText = newStatus === "resolved" ? "resolved" : "reopened";
+      toast.success(`Doubt marked as ${statusText}`);
       setSelectedDoubt(null);
       fetchDoubts();
     } catch {
-      toast.error("Failed to resolve doubt");
+      toast.error("Failed to update doubt status");
     }
   };
 
@@ -108,19 +113,21 @@ const StudentDashboard = () => {
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-2">
             <strong className="text-gray-800">{comment.author.name}</strong>
-            <span className={`text-xs px-2 py-1 rounded-full ${
-              comment.author.role === "mentor" 
-                ? "bg-green-100 text-green-700" 
-                : "bg-blue-100 text-blue-700"
-            }`}>
+            <span
+              className={`text-xs px-2 py-1 rounded-full ${
+                comment.author.role === "mentor"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-blue-100 text-blue-700"
+              }`}
+            >
               {comment.author.role === "mentor" ? "🎓 Mentor" : "👤 Student"}
             </span>
             <span className="text-gray-400 text-xs">
               {new Date(comment.createdAt).toLocaleString()}
             </span>
           </div>
-          {/* Only show edit/delete for student's own comments */}
-          {comment.author.role === "student" && (
+          {/* Only show edit/delete for user's own comments */}
+          {user && comment.author._id === user.id && (
             <div className="flex gap-2 text-xs">
               <button
                 onClick={() => {
@@ -131,7 +138,7 @@ const StudentDashboard = () => {
               >
                 ✏️ Edit
               </button>
-              <button 
+              <button
                 onClick={() => handleDelete(comment._id)}
                 className="text-red-600 hover:text-red-800"
               >
@@ -149,17 +156,17 @@ const StudentDashboard = () => {
               rows="2"
             />
             <div className="flex flex-col gap-1">
-              <button 
-                onClick={handleEdit} 
+              <button
+                onClick={handleEdit}
                 className="text-green-600 hover:text-green-800 text-xs"
               >
                 💾 Save
               </button>
-              <button 
+              <button
                 onClick={() => {
                   setEditingCommentId(null);
                   setEditText("");
-                }} 
+                }}
                 className="text-gray-600 hover:text-gray-800 text-xs"
               >
                 ❌ Cancel
@@ -169,14 +176,17 @@ const StudentDashboard = () => {
         ) : (
           <p className="mt-2 text-gray-700">{comment.text}</p>
         )}
-        <button
-          onClick={() => {
-            setReplyToCommentId(comment._id);
-          }}
-          className="text-xs text-blue-500 mt-2 hover:text-blue-700 font-medium"
-        >
-          ↪️ Reply
-        </button>
+        {/* Only show reply button if the comment is not from the current user */}
+        {user && comment.author._id !== user.id && (
+          <button
+            onClick={() => {
+              setReplyToCommentId(comment._id);
+            }}
+            className="text-xs text-blue-500 mt-2 hover:text-blue-700 font-medium"
+          >
+            ↪️ Reply
+          </button>
+        )}
       </div>
       {comment.replies?.length > 0 &&
         comment.replies.map((reply) => renderComment(reply, depth + 1))}
@@ -305,9 +315,11 @@ const StudentDashboard = () => {
                 {replyToCommentId && (
                   <div className="bg-blue-50 p-2 rounded mb-2 text-sm">
                     <span className="text-blue-600">
-                      Replying to: {comments.find(c => 
-                        c._id === replyToCommentId || 
-                        c.replies?.some(r => r._id === replyToCommentId)
+                      Replying to:{" "}
+                      {comments.find(
+                        (c) =>
+                          c._id === replyToCommentId ||
+                          c.replies?.some((r) => r._id === replyToCommentId)
                       )?.author?.name || "comment"}
                     </span>
                     <button
@@ -329,7 +341,7 @@ const StudentDashboard = () => {
                         : "Write a comment..."
                     }
                     onKeyPress={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
+                      if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
                         handleReply();
                       }
@@ -342,12 +354,19 @@ const StudentDashboard = () => {
                   >
                     {replyToCommentId ? "Reply" : "Comment"}
                   </button>
-                  {selectedDoubt.status === "open" && (
+                  {(selectedDoubt.status === "open" ||
+                    selectedDoubt.status === "resolved") && (
                     <button
-                      onClick={handleResolve}
-                      className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
+                      onClick={handleToggleResolve}
+                      className={`px-4 py-2 rounded text-sm transition-colors ${
+                        selectedDoubt.status === "resolved"
+                          ? "bg-orange-600 hover:bg-orange-700 text-white"
+                          : "bg-green-600 hover:bg-green-700 text-white"
+                      }`}
                     >
-                      Mark as Resolved
+                      {selectedDoubt.status === "resolved"
+                        ? "Reopen Doubt"
+                        : "Mark as Resolved"}
                     </button>
                   )}
                 </div>

@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import loginIllustration from "../assets/images/login-img.jpg";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import apiInstance from "../../api/apiInstance";
+import apiInstance from "../api/apiInstance";
 import { toast } from "react-toastify";
 
 const Login = () => {

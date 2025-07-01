@@ -112,3 +112,42 @@ export const markDoubtResolved = async (req, res) => {
       .json({ msg: "Failed to mark as resolved", error: err.message });
   }
 };
+
+// New function for both students and mentors to toggle resolve status
+export const toggleDoubtStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // First find the doubt to check current status
+    const doubt = await Doubt.findById(id);
+    if (!doubt) {
+      return res.status(404).json({ msg: "Doubt not found" });
+    }
+
+    // Check authorization
+    if (
+      req.user.role === "student" &&
+      doubt.student.toString() !== req.user.id
+    ) {
+      return res
+        .status(403)
+        .json({ msg: "Students can only toggle their own doubts" });
+    }
+    // Mentors can toggle any doubt (no additional check needed)
+
+    // Toggle status
+    const newStatus = doubt.status === "resolved" ? "open" : "resolved";
+
+    const updated = await Doubt.findByIdAndUpdate(
+      id,
+      { status: newStatus, updatedAt: Date.now() },
+      { new: true }
+    ).populate("student", "name email");
+
+    res.json(updated);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ msg: "Failed to toggle doubt status", error: err.message });
+  }
+};
