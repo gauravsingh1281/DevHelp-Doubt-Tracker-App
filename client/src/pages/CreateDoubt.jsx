@@ -22,10 +22,10 @@ const CreateDoubt = () => {
     setLoading(true);
     try {
       await apiInstance.post("/doubts", form);
-      toast.success("✅ Doubt posted successfully!");
-      navigate("/"); // redirect if needed
+      toast.success("Doubt posted successfully!");
+      navigate("/dashboard/student"); // redirect if needed
     } catch (err) {
-      toast.error("❌ " + (err.response?.data?.msg || "Failed to post doubt"));
+      toast.error(err.response?.data?.msg || "Failed to post doubt");
     } finally {
       setLoading(false);
     }

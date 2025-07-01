@@ -32,7 +32,7 @@ const Login = () => {
       const res = await apiInstance.post("/auth/login", form);
       login(res.data.user, res.data.token);
       toast.success("Logged in successfully");
-      navigate("/doubts/create");
+      navigate("/dashboard");
     } catch (err) {
       toast.error(err.response?.data?.msg || "Login failed");
     } finally {

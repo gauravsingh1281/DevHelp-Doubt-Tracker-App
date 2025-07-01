@@ -109,7 +109,6 @@ const MentorDashboard = () => {
                 <div className="text-xs text-gray-500 flex gap-4 mb-4">
                   <span>🕒 {new Date(doubt.createdAt).toLocaleString()}</span>
                   <span>👤 {doubt.student?.name || "Unknown"}</span>
-                  <span>📌 {doubt.subject || "General"}</span>
                 </div>
 
                 {/* Comment input */}
