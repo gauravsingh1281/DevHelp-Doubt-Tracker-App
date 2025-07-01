@@ -1,42 +1,108 @@
-import { useNavigate } from "react-router";
-import hero1 from "../assets/images/hero1.png";
-import hero2 from "../assets/images/hero2.png";
+import { useNavigate } from "react-router-dom";
+
 export default function Home() {
   const navigate = useNavigate();
+
   return (
-    // Hero section
-    <>
-      <section className="w-full bg-white py-4 px-4 md:px-10 lg:px-10 flex justify-between items-center gap-4 md:gap-0 lg:gap-0 flex-col-reverse md:flex-row lg:flex-row">
-        <div className=" w-full md:w-1/2 lg:w-1/2   flex justify-center items-center md:items-start lg:items-start flex-col gap-10">
-          <h1 className="text-center md:text-left lg:text-left text-2xl sm:text-3xl md:text-3xl lg:text-5xl font-Cormorant md:leading-[40px] lg:leading-[55px]">
-            Don’t let your thoughts die <br /> bring them to life by writing on
-            ThoughtLog.
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center">
+              <h1 className="text-2xl font-bold text-blue-600">DevHelp</h1>
+              <span className="ml-2 text-gray-600">Doubt Tracker</span>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => navigate("/login")}
+                className="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => navigate("/register")}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Sign Up
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center">
+          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+            Get Help with Your
+            <span className="text-blue-600"> Coding Doubts</span>
           </h1>
+          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            Connect with experienced mentors, post your doubts, and get detailed
+            solutions. Join our community of learners and mentors today.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              onClick={() => navigate("/register")}
+              className="px-8 py-3 bg-blue-600 text-white text-lg rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              🎓 Join as Student
+            </button>
+            <button
+              onClick={() => navigate("/register")}
+              className="px-8 py-3 bg-green-600 text-white text-lg rounded-lg hover:bg-green-700 transition-colors font-medium"
+            >
+              👨‍🏫 Become a Mentor
+            </button>
+          </div>
+        </div>
+
+        {/* Features Section */}
+        <div className="mt-20 grid md:grid-cols-3 gap-8">
+          <div className="text-center p-6 bg-white rounded-lg shadow-sm border">
+            <div className="text-4xl mb-4">❓</div>
+            <h3 className="text-xl font-semibold mb-2">Ask Questions</h3>
+            <p className="text-gray-600">
+              Post your coding doubts with screenshots and detailed descriptions
+            </p>
+          </div>
+
+          <div className="text-center p-6 bg-white rounded-lg shadow-sm border">
+            <div className="text-4xl mb-4">💬</div>
+            <h3 className="text-xl font-semibold mb-2">Get Answers</h3>
+            <p className="text-gray-600">
+              Experienced mentors will help you solve your problems step by step
+            </p>
+          </div>
+
+          <div className="text-center p-6 bg-white rounded-lg shadow-sm border">
+            <div className="text-4xl mb-4">🚀</div>
+            <h3 className="text-xl font-semibold mb-2">Learn & Grow</h3>
+            <p className="text-gray-600">
+              Track your progress and become a better developer with
+              personalized guidance
+            </p>
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div className="mt-20 text-center bg-blue-50 rounded-2xl p-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            Ready to Start Learning?
+          </h2>
+          <p className="text-lg text-gray-600 mb-6">
+            Join thousands of students and mentors in our growing community
+          </p>
           <button
-            className="py-2 px-3 md:py-2.5 md:px-4 text-lg bg-black text-white rounded-md cursor-pointer active:scale-[94%] transition-all duration-200 ease-in font-OpenSans"
-            onClick={() => navigate("/signup")}
+            onClick={() => navigate("/register")}
+            className="px-8 py-3 bg-blue-600 text-white text-lg rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
-            Try ThoughtLog. It's free.
+            Get Started Today
           </button>
         </div>
-        <div className="w-full md:w-1/2 lg:w-1/2   flex justify-center md:justify-end lg:justify-end items-center">
-          <img className="w-[80%] " src={hero1} alt="hero1-img" />
-        </div>
-      </section>
-      <section className="w-full bg-white py-4 px-4 md:px-10 lg:px-10 flex justify-between items-center gap-4 md:gap-0 lg:gap-0 flex-col md:flex-row lg:flex-row">
-        <div className="w-full md:w-1/2 lg:w-1/2   flex justify-center md:justify-start lg:justify-start items-center">
-          <img className="w-[80%] " src={hero2} alt="hero2-img" />
-        </div>
-        <div className=" w-full md:w-1/2 lg:w-1/2  flex justify-center items-center md:items-start lg:items-start flex-col gap-2">
-          <h1 className="text-center md:text-left lg:text-left text-3xl  md:text-4xl lg:text-5xl font-Cormorant font-bold">
-            Write without losing.
-          </h1>
-          <p className="text-lg md:text-2xl lg:text-2xl font-Cormorant text-center md:text-justify  lg:text-justify">
-            As soon as the dream fades, it disappears among the stars, write it
-            down before it's lost. ThoughtLog is where your dreams find a home.
-          </p>
-        </div>
-      </section>
-    </>
+      </main>
+    </div>
   );
 }
