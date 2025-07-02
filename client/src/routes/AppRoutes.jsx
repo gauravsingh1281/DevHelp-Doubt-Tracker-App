@@ -4,7 +4,6 @@ import Login from "../pages/Login";
 import ProtectedRoute from "./ProtectedRoute";
 import RoleProtectedRoute from "./RoleProtectedRoute";
 import CreateDoubt from "../pages/CreateDoubt";
-import MyDoubts from "../pages/MyDoubts";
 import RootLayout from "../layout/RootLayout";
 import Home from "../pages/Home";
 import DashboardLayout from "../layout/DashboardLayout";
@@ -31,22 +30,6 @@ const AppRoutes = () => {
         <Route index element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route
-          path="/doubts/create"
-          element={
-            <ProtectedRoute>
-              <CreateDoubt />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/doubts/my"
-          element={
-            <ProtectedRoute>
-              <MyDoubts />
-            </ProtectedRoute>
-          }
-        />
       </Route>
       {/* Dashboard Routes */}
       <Route
@@ -58,6 +41,14 @@ const AppRoutes = () => {
         }
       >
         <Route index element={<DashboardRedirect />} />
+        <Route
+          path="student/doubts/create"
+          element={
+            <RoleProtectedRoute allowedRoles={["student"]}>
+              <CreateDoubt />
+            </RoleProtectedRoute>
+          }
+        />
         <Route
           path="student"
           element={

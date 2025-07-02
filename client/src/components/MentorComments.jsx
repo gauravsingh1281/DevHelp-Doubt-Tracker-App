@@ -15,26 +15,15 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
 
   const fetchComments = useCallback(async () => {
     if (!doubtId) {
-      console.log("fetchComments called but no doubtId provided");
       return;
     }
 
-    console.log("Starting fetchComments for doubtId:", doubtId);
     setLoading(true);
     setError(null);
     try {
-      console.log("Making API call to /comments/" + doubtId);
       const res = await apiInstance.get(`/comments/${doubtId}`);
-      console.log("API response status:", res.status);
-      console.log("Comments received:", res.data);
-      console.log("Number of comments:", res.data?.length || 0);
       setComments(res.data || []);
     } catch (err) {
-      console.error("Error fetching comments:", err);
-      console.error("Error response:", err.response);
-      console.error("Error status:", err.response?.status);
-      console.error("Error data:", err.response?.data);
-
       setError(err.message);
       setComments([]); // Reset comments on error
 
@@ -71,14 +60,7 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
   useEffect(() => {
     if (onCommentsUpdate && Array.isArray(comments)) {
       const totalCount = countCommentsRecursively(comments);
-      console.log(
-        "Updating comment count to:",
-        totalCount,
-        "for doubt:",
-        doubtId,
-        "from comments:",
-        comments
-      );
+
       try {
         onCommentsUpdate(totalCount);
       } catch (error) {
@@ -271,15 +253,8 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
   };
 
   useEffect(() => {
-    console.log("MentorComments useEffect triggered:", {
-      doubtId,
-      hasDoubtId: !!doubtId,
-    });
     if (doubtId) {
-      console.log("Calling fetchComments for doubtId:", doubtId);
       fetchComments();
-    } else {
-      console.log("No doubtId provided, skipping fetchComments");
     }
   }, [doubtId, fetchComments]);
 

@@ -4,6 +4,9 @@ import { toast } from "react-toastify";
 import apiInstance from "../api/apiInstance";
 import { AuthContext } from "../context/AuthContext";
 import MentorComments from "../components/MentorComments";
+import { MdClose } from "react-icons/md";
+import { FaCode, FaRegClock, FaRegCommentDots, FaUser } from "react-icons/fa";
+import { FiRefreshCcw } from "react-icons/fi";
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
@@ -245,12 +248,6 @@ const StudentDashboard = () => {
           {/* Mobile Close Button */}
           <div className="flex items-center justify-between mb-6">
             <button
-              onClick={() => navigate(-1)}
-              className="text-2xl bg-blue-100 text-blue-600 rounded-full w-10 h-10 flex items-center justify-center"
-            >
-              ←
-            </button>
-            <button
               onClick={() => setSidebarOpen(false)}
               className="lg:hidden text-gray-500 hover:text-gray-700 text-xl w-8 h-8 flex items-center justify-center"
             >
@@ -315,7 +312,7 @@ const StudentDashboard = () => {
             Student Dashboard
           </h1>
           <button
-            onClick={() => navigate("/ask-doubt")}
+            onClick={() => navigate("/dashboard/student/doubts/create")}
             className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors"
           >
             <svg
@@ -351,7 +348,17 @@ const StudentDashboard = () => {
                 }`}
                 title="Refresh doubts and comment counts"
               >
-                {refreshing ? "🔄 Refreshing..." : "🔄 Refresh"}
+                {refreshing ? (
+                  <span className="flex items-center gap-2">
+                    <FiRefreshCcw className="inline-block " />
+                    Refreshing...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <FiRefreshCcw className="inline-block" />
+                    Refresh
+                  </span>
+                )}
               </button>
               <div className="text-sm text-gray-500 text-center sm:text-left w-full sm:w-auto">
                 Total: {doubts.length} doubts
@@ -360,135 +367,143 @@ const StudentDashboard = () => {
           </div>
 
           {/* Doubt Cards */}
-          <div className="space-y-4">
-            {filteredDoubts.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-500">
-                  No doubts found for the selected filter.
-                </p>
-              </div>
-            ) : (
-              filteredDoubts.map((doubt) => (
-                <div
-                  key={doubt._id}
-                  className="bg-white rounded-lg p-4 lg:p-6 shadow border border-gray-200 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-4 gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 lg:gap-3 mb-2">
-                        <h2 className="text-base lg:text-lg font-semibold text-gray-800 break-words">
-                          {doubt.title}
-                        </h2>
-                        <span
-                          className={`text-xs px-3 py-1 rounded-full font-medium self-start ${
+          {doubts.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">
+                You have not asked any doubts yet. Click the button below to ask
+                your first doubt!
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredDoubts.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">
+                    No doubts found for the selected filter.
+                  </p>
+                </div>
+              ) : (
+                filteredDoubts.map((doubt) => (
+                  <div
+                    key={doubt._id}
+                    className="bg-white rounded-lg p-4 lg:p-6 shadow border border-gray-200 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-4 gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 lg:gap-3 mb-2">
+                          <h2 className="text-base lg:text-lg font-semibold text-gray-800 break-words">
+                            {doubt.title.length > 85
+                              ? `${doubt.title.slice(0, 85)}...`
+                              : doubt.title}
+                          </h2>
+                          <span
+                            className={`text-xs px-3 py-1 rounded-full font-medium self-start ${
+                              doubt.status === "resolved"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-orange-100 text-orange-700"
+                            }`}
+                          >
+                            {doubt.status === "resolved"
+                              ? "✅ Resolved"
+                              : "⚠️ Open"}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs lg:text-sm text-gray-500 mb-3">
+                          <span>
+                            <FaUser className="inline-block mr-1" /> You
+                            (Author)
+                          </span>
+                          <span className="whitespace-nowrap">
+                            <FaRegClock className="inline-block mr-1" />
+                            {new Date(doubt.createdAt).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="text-gray-700 mb-4 leading-relaxed text-sm lg:text-base">
+                      {doubt.description.length > 150
+                        ? `${doubt.description.slice(0, 150)}...`
+                        : doubt.description}
+                    </p>
+
+                    {doubt.screenshot && (
+                      <div className="mb-4">
+                        <img
+                          src={doubt.screenshot}
+                          alt="Doubt Screenshot"
+                          className="max-w-full sm:max-w-sm h-32 object-contain border rounded-lg shadow-sm"
+                        />
+                      </div>
+                    )}
+
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs lg:text-sm text-gray-500">
+                        <span>
+                          <FaRegCommentDots className="inline-block mr-1" />
+                          {commentCounts[doubt._id] ||
+                            doubt.commentCount ||
+                            0}{" "}
+                          Comments
+                        </span>
+                        <span>
+                          <FaCode className="inline-block mr-1" />
+                          {doubt.subject || "General"}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <button
+                          onClick={() => handleOpenOverlay(doubt)}
+                          className="px-3 lg:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm cursor-pointer"
+                        >
+                          View Details
+                        </button>
+
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            try {
+                              await apiInstance.patch(
+                                `/doubts/${doubt._id}/toggle-status`
+                              );
+                              const newStatus =
+                                doubt.status === "resolved"
+                                  ? "open"
+                                  : "resolved";
+                              const statusText =
+                                newStatus === "resolved"
+                                  ? "resolved"
+                                  : "reopened";
+                              toast.success(`Doubt marked as ${statusText}`);
+                              fetchDoubts();
+                            } catch {
+                              toast.error("Failed to update doubt status");
+                            }
+                          }}
+                          className={`px-3 lg:px-4 py-2 rounded-lg transition-colors text-sm cursor-pointer ${
                             doubt.status === "resolved"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-orange-100 text-orange-700"
+                              ? "bg-orange-600 hover:bg-orange-700 text-white"
+                              : "bg-green-600 hover:bg-green-700 text-white"
                           }`}
                         >
                           {doubt.status === "resolved"
-                            ? "✅ Resolved"
-                            : "⚠️ Open"}
-                        </span>
-                      </div>
-
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs lg:text-sm text-gray-500 mb-3">
-                        <span>👤 You (Author)</span>
-                        <span className="whitespace-nowrap">
-                          🕒 {new Date(doubt.createdAt).toLocaleDateString()}
-                        </span>
+                            ? "Reopen"
+                            : "Mark as Resolved"}
+                        </button>
                       </div>
                     </div>
                   </div>
-
-                  <p className="text-gray-700 mb-4 leading-relaxed text-sm lg:text-base">
-                    {doubt.description.length > 150
-                      ? `${doubt.description.slice(0, 150)}...`
-                      : doubt.description}
-                  </p>
-
-                  {doubt.screenshot && (
-                    <div className="mb-4">
-                      <img
-                        src={doubt.screenshot}
-                        alt="Doubt Screenshot"
-                        className="max-w-full sm:max-w-sm h-32 object-contain border rounded-lg shadow-sm"
-                      />
-                    </div>
-                  )}
-
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs lg:text-sm text-gray-500">
-                      <span>
-                        💬 {commentCounts[doubt._id] || doubt.commentCount || 0}{" "}
-                        Comments
-                      </span>
-                      <span>📚 {doubt.subject || "General"}</span>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <button
-                        onClick={() => handleOpenOverlay(doubt)}
-                        className="px-3 lg:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm cursor-pointer"
-                      >
-                        View Details
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditDoubt(doubt);
-                        }}
-                        className="px-3 lg:px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm cursor-pointer"
-                      >
-                        ✏️ Edit
-                      </button>
-                      <button
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          try {
-                            await apiInstance.patch(
-                              `/doubts/${doubt._id}/toggle-status`
-                            );
-                            const newStatus =
-                              doubt.status === "resolved" ? "open" : "resolved";
-                            const statusText =
-                              newStatus === "resolved"
-                                ? "resolved"
-                                : "reopened";
-                            toast.success(`Doubt marked as ${statusText}`);
-                            fetchDoubts();
-                          } catch {
-                            toast.error("Failed to update doubt status");
-                          }
-                        }}
-                        className={`px-3 lg:px-4 py-2 rounded-lg transition-colors text-sm cursor-pointer ${
-                          doubt.status === "resolved"
-                            ? "bg-orange-600 hover:bg-orange-700 text-white"
-                            : "bg-green-600 hover:bg-green-700 text-white"
-                        }`}
-                      >
-                        {doubt.status === "resolved" ? "Reopen" : "Resolve"}
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteDoubt(doubt._id);
-                        }}
-                        className="px-3 lg:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm cursor-pointer"
-                      >
-                        🗑️ Delete
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+                ))
+              )}
+            </div>
+          )}
 
           {/* Desktop Floating Action Button */}
 
           <button
-            onClick={() => navigate("/doubts/create")}
+            onClick={() => navigate("/dashboard/student/doubts/create")}
             title="Ask a new doubt"
             className="hidden lg:flex fixed bottom-6 right-6 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer"
           >
@@ -524,9 +539,9 @@ const StudentDashboard = () => {
                 </div>
                 <button
                   onClick={handleCloseModal}
-                  className="text-gray-500 hover:text-gray-700 text-2xl cursor-pointer p-1"
+                  className="text-gray-500 hover:text-gray-700  cursor-pointer p-1"
                 >
-                  ✖
+                  <MdClose className="text-4xl font-bold" />
                 </button>
               </div>
 
@@ -566,7 +581,7 @@ const StudentDashboard = () => {
                   </div>
                   <div>
                     <strong>Created:</strong>{" "}
-                    {new Date(selectedDoubt.createdAt).toLocaleDateString()}
+                    {new Date(selectedDoubt.createdAt).toLocaleString()}
                   </div>
                   <div>
                     <strong>Subject:</strong>{" "}
@@ -599,7 +614,7 @@ const StudentDashboard = () => {
                     onClick={() => handleEditDoubt(selectedDoubt)}
                     className="px-4 lg:px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm lg:text-base cursor-pointer"
                   >
-                    ✏️ Edit Doubt
+                    Edit Doubt
                   </button>
                   <button
                     onClick={handleToggleResolve}
@@ -617,7 +632,7 @@ const StudentDashboard = () => {
                     onClick={() => handleDeleteDoubt(selectedDoubt._id)}
                     className="px-4 lg:px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm lg:text-base cursor-pointer"
                   >
-                    🗑️ Delete Doubt
+                    Delete Doubt
                   </button>
                   <button
                     onClick={handleCloseModal}
@@ -650,9 +665,9 @@ const StudentDashboard = () => {
                     });
                     setEditPreviewUrl("");
                   }}
-                  className="text-gray-500 hover:text-gray-700 text-2xl cursor-pointer p-1"
+                  className="text-gray-500 hover:text-gray-700  cursor-pointer p-1"
                 >
-                  ✖
+                  <MdClose className="text-4xl font-bold" />
                 </button>
               </div>
 
@@ -706,7 +721,7 @@ const StudentDashboard = () => {
                           onClick={handleRemoveEditScreenshot}
                           className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
                         >
-                          ✖
+                          <MdClose className="text-lg" />
                         </button>
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
@@ -736,7 +751,7 @@ const StudentDashboard = () => {
                     onClick={handleUpdateDoubt}
                     className="px-4 lg:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer text-sm lg:text-base"
                   >
-                    💾 Update Doubt
+                    Update Doubt
                   </button>
                   <button
                     onClick={() => {
