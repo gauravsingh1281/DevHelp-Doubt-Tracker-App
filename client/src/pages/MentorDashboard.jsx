@@ -1,9 +1,12 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, lazy, Suspense } from "react";
 import { toast } from "react-toastify";
 import apiInstance from "../api/apiInstance";
-import MentorComments from "../components/MentorComments";
 import { FaCode, FaRegClock, FaRegCommentDots, FaUser } from "react-icons/fa";
 import { FiMail, FiRefreshCcw } from "react-icons/fi";
+import MiniLoader from "../components/MiniLoader";
+
+// Lazy load MentorComments component
+const MentorComments = lazy(() => import("../components/MentorComments"));
 
 const MentorDashboard = () => {
   const [doubts, setDoubts] = useState([]);
@@ -414,12 +417,16 @@ const MentorDashboard = () => {
                     Comments & Discussion:
                   </h3>
                   {selectedDoubt._id ? (
-                    <MentorComments
-                      doubtId={selectedDoubt._id}
-                      onCommentsUpdate={(count) =>
-                        updateCommentCount(selectedDoubt._id, count)
-                      }
-                    />
+                    <Suspense
+                      fallback={<MiniLoader text="Loading comments..." />}
+                    >
+                      <MentorComments
+                        doubtId={selectedDoubt._id}
+                        onCommentsUpdate={(count) =>
+                          updateCommentCount(selectedDoubt._id, count)
+                        }
+                      />
+                    </Suspense>
                   ) : (
                     <p className="text-gray-500 text-sm">
                       Unable to load comments

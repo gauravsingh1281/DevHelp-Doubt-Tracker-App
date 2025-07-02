@@ -1,17 +1,21 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Register from "../pages/Register";
-import Login from "../pages/Login";
+import { lazy, Suspense, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 import ProtectedRoute from "./ProtectedRoute";
 import RoleProtectedRoute from "./RoleProtectedRoute";
-import CreateDoubt from "../pages/CreateDoubt";
-import RootLayout from "../layout/RootLayout";
-import Home from "../pages/Home";
-import DashboardLayout from "../layout/DashboardLayout";
-import StudentDashboard from "../pages/StudentDashboard";
-import MentorDashboard from "../pages/MentorDashboard";
-import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-import NotAuthorized from "../pages/NotAuthorized";
+import SuspenseLoader from "../components/SuspenseLoader";
+
+// Lazy load all components
+const Register = lazy(() => import("../pages/Register"));
+const Login = lazy(() => import("../pages/Login"));
+const CreateDoubt = lazy(() => import("../pages/CreateDoubt"));
+const RootLayout = lazy(() => import("../layout/RootLayout"));
+const Home = lazy(() => import("../pages/Home"));
+const DashboardLayout = lazy(() => import("../layout/DashboardLayout"));
+const StudentDashboard = lazy(() => import("../pages/StudentDashboard"));
+const MentorDashboard = lazy(() => import("../pages/MentorDashboard"));
+const NotAuthorized = lazy(() => import("../pages/NotAuthorized"));
+
 const AppRoutes = () => {
   const DashboardRedirect = () => {
     const { user } = useContext(AuthContext);
@@ -23,51 +27,54 @@ const AppRoutes = () => {
       <Navigate to="/dashboard/student" replace />
     );
   };
+
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/" element={<RootLayout />}>
-        <Route index element={<Home />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-      </Route>
-      {/* Dashboard Routes */}
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<DashboardRedirect />} />
+    <Suspense fallback={<SuspenseLoader />}>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<RootLayout />}>
+          <Route index element={<Home />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+        </Route>
+        {/* Dashboard Routes */}
         <Route
-          path="student/doubts/create"
+          path="/dashboard"
           element={
-            <RoleProtectedRoute allowedRoles={["student"]}>
-              <CreateDoubt />
-            </RoleProtectedRoute>
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
           }
-        />
-        <Route
-          path="student"
-          element={
-            <RoleProtectedRoute allowedRoles={["student"]}>
-              <StudentDashboard />
-            </RoleProtectedRoute>
-          }
-        />
-        <Route
-          path="mentor"
-          element={
-            <RoleProtectedRoute allowedRoles={["mentor"]}>
-              <MentorDashboard />
-            </RoleProtectedRoute>
-          }
-        />
-      </Route>
-      <Route path="/not-authorized" element={<NotAuthorized />} />
-    </Routes>
+        >
+          <Route index element={<DashboardRedirect />} />
+          <Route
+            path="student/doubts/create"
+            element={
+              <RoleProtectedRoute allowedRoles={["student"]}>
+                <CreateDoubt />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="student"
+            element={
+              <RoleProtectedRoute allowedRoles={["student"]}>
+                <StudentDashboard />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="mentor"
+            element={
+              <RoleProtectedRoute allowedRoles={["mentor"]}>
+                <MentorDashboard />
+              </RoleProtectedRoute>
+            }
+          />
+        </Route>
+        <Route path="/not-authorized" element={<NotAuthorized />} />
+      </Routes>
+    </Suspense>
   );
 };
 

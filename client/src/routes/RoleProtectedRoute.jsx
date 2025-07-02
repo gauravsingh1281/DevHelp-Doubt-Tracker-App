@@ -1,7 +1,10 @@
 import { Navigate } from "react-router-dom";
-import NotAuthorized from "../pages/NotAuthorized";
-import { useContext } from "react";
+import { useContext, lazy, Suspense } from "react";
 import { AuthContext } from "../context/AuthContext";
+import MiniLoader from "../components/MiniLoader";
+
+// Lazy load NotAuthorized component
+const NotAuthorized = lazy(() => import("../pages/NotAuthorized"));
 
 const RoleProtectedRoute = ({ allowedRoles = [], children }) => {
   const { token, user } = useContext(AuthContext);
@@ -9,7 +12,11 @@ const RoleProtectedRoute = ({ allowedRoles = [], children }) => {
   if (!token) return <Navigate to="/login" replace />;
 
   if (!allowedRoles.includes(user?.role)) {
-    return <NotAuthorized />;
+    return (
+      <Suspense fallback={<MiniLoader text="Loading..." />}>
+        <NotAuthorized />
+      </Suspense>
+    );
   }
 
   return children;
