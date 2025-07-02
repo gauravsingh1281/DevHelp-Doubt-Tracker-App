@@ -92,7 +92,7 @@ const Register = () => {
               placeholder="Enter full name"
               name="name"
               className="border outline-0 my-2 w-full rounded-md p-2"
-              value={form.name}
+              value={form.name.charAt(0).toUpperCase() + form.name.slice(1)}
               onChange={handleChange}
               autoComplete="off"
             />
