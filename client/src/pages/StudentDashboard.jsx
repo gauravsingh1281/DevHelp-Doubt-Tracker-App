@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import apiInstance from "../api/apiInstance";
@@ -18,8 +18,8 @@ const StudentDashboard = () => {
   const [editDoubtForm, setEditDoubtForm] = useState({
     title: "",
     description: "",
-    screenshot: null, // File object for new uploads
-    existingScreenshot: "", // URL for existing screenshot
+    screenshot: null,
+    existingScreenshot: "",
   });
   const [editPreviewUrl, setEditPreviewUrl] = useState("");
   const [commentCounts, setCommentCounts] = useState({});
@@ -44,11 +44,10 @@ const StudentDashboard = () => {
         }
       });
 
-      // Merge with existing comment counts to preserve real-time updates
       setCommentCounts((prev) => {
         const merged = {
           ...initialCommentCounts,
-          ...prev, // Keep any real-time updates that might be higher than backend data
+          ...prev,
         };
         return merged;
       });
@@ -61,7 +60,7 @@ const StudentDashboard = () => {
 
   const handleOpenOverlay = (doubt) => {
     setSelectedDoubt(doubt);
-    // Ensure comment count is initialized for this doubt when opened
+
     if (doubt._id && commentCounts[doubt._id] === undefined) {
       setCommentCounts((prev) => ({
         ...prev,
@@ -70,12 +69,21 @@ const StudentDashboard = () => {
     }
   };
 
-  const updateCommentCount = (doubtId, count) => {
+  const updateCommentCount = useCallback((doubtId, count) => {
     setCommentCounts((prev) => ({
       ...prev,
       [doubtId]: count,
     }));
-  };
+  }, []);
+
+  const handleCommentsUpdate = useCallback(
+    (count) => {
+      if (selectedDoubt?._id) {
+        updateCommentCount(selectedDoubt._id, count);
+      }
+    },
+    [selectedDoubt?._id, updateCommentCount]
+  );
 
   const handleCloseModal = () => {
     setSelectedDoubt(null);
@@ -93,7 +101,6 @@ const StudentDashboard = () => {
       const statusText = newStatus === "resolved" ? "resolved" : "reopened";
       toast.success(`Doubt marked as ${statusText}`);
 
-      // Update the doubt in state
       setDoubts((prev) =>
         prev.map((doubt) =>
           doubt._id === selectedDoubt._id
@@ -102,7 +109,6 @@ const StudentDashboard = () => {
         )
       );
 
-      // Update selected doubt
       setSelectedDoubt((prev) => ({ ...prev, status: newStatus }));
 
       // Refresh doubts to get updated comment counts
@@ -597,9 +603,7 @@ const StudentDashboard = () => {
                   {selectedDoubt._id ? (
                     <MentorComments
                       doubtId={selectedDoubt._id}
-                      onCommentsUpdate={(count) =>
-                        updateCommentCount(selectedDoubt._id, count)
-                      }
+                      onCommentsUpdate={handleCommentsUpdate}
                     />
                   ) : (
                     <p className="text-gray-500 text-sm">

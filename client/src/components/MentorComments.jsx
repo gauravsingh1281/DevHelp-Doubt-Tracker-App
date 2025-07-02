@@ -3,6 +3,17 @@ import { toast } from "react-toastify";
 import apiInstance from "../api/apiInstance";
 import { AuthContext } from "../context/AuthContext";
 
+// Recursive function to count all comments and nested replies
+const countCommentsRecursively = (comments) => {
+  return comments.reduce((total, comment) => {
+    let count = 1;
+    if (comment.replies && Array.isArray(comment.replies)) {
+      count += countCommentsRecursively(comment.replies);
+    }
+    return total + count;
+  }, 0);
+};
+
 const MentorComments = ({ doubtId, onCommentsUpdate }) => {
   const { user } = useContext(AuthContext);
   const [comments, setComments] = useState([]);
@@ -44,18 +55,6 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
     }
   }, [doubtId]);
 
-  // Recursive function to count all comments and nested replies
-  const countCommentsRecursively = useCallback((comments) => {
-    return comments.reduce((total, comment) => {
-      // Count the comment itself + all its nested replies
-      let count = 1; // The comment itself
-      if (comment.replies && Array.isArray(comment.replies)) {
-        count += countCommentsRecursively(comment.replies); // Recursively count nested replies
-      }
-      return total + count;
-    }, 0);
-  }, []);
-
   // Update comment count when comments change
   useEffect(() => {
     if (onCommentsUpdate && Array.isArray(comments)) {
@@ -67,7 +66,7 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
         console.error("Error updating comment count:", error);
       }
     }
-  }, [comments, onCommentsUpdate, doubtId, countCommentsRecursively]);
+  }, [comments, onCommentsUpdate, doubtId]);
 
   const handleAddComment = async () => {
     if (!replyText.trim()) return;
