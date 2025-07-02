@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import pageNotFoundIllustration from "../assets/images/error-img.jpg";
 
 const PageNotFound = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen flex flex-col justify-center items-center px-4 bg-gray-100">
       <div className="max-w-4xl w-full bg-white shadow-md rounded-xl overflow-hidden flex flex-col lg:flex-row items-center">
@@ -17,12 +18,12 @@ const PageNotFound = () => {
           <p className="text-gray-600 text-lg">
             The page you're looking for doesn't exist.
           </p>
-          <Link
-            to="/"
+          <button
+            onClick={() => navigate(-1)}
             className="inline-block bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition duration-300"
           >
-            Back to Home
-          </Link>
+            Go Back
+          </button>
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import RoleProtectedRoute from "./RoleProtectedRoute";
 import SuspenseLoader from "../components/SuspenseLoader";
 import PageNotFound from "../pages/PageNotFound";
+import PageUnderDev from "../pages/PageUnderDev";
 
 // Lazy load all components
 const Register = lazy(() => import("../pages/Register"));
@@ -35,6 +36,8 @@ const AppRoutes = () => {
         {/* Public Routes */}
         <Route path="/" element={<RootLayout />}>
           <Route index element={<Home />} />
+          <Route path="/aboutUs" element={<PageUnderDev />} />
+          <Route path="/contactUs" element={<PageUnderDev />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
         </Route>
@@ -48,6 +51,7 @@ const AppRoutes = () => {
           }
         >
           <Route index element={<DashboardRedirect />} />
+
           <Route
             path="student/doubts/create"
             element={
