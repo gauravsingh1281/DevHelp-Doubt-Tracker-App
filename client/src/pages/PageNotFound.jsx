@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import pageNotFoundIllustration from "../assets/images/unauthorized-access.svg";
+import pageNotFoundIllustration from "../assets/images/error-img.jpg";
 
-const NotAuthorized = () => {
+const PageNotFound = () => {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center px-4 bg-gray-100">
       <div className="max-w-4xl w-full bg-white shadow-md rounded-xl overflow-hidden flex flex-col lg:flex-row items-center">
@@ -15,7 +15,7 @@ const NotAuthorized = () => {
         <div className="lg:w-1/2 w-full p-6 text-center space-y-4">
           <h1 className="text-4xl font-bold text-gray-800">Oops!</h1>
           <p className="text-gray-600 text-lg">
-            You do not have permission to access this page.
+            The page you're looking for doesn't exist.
           </p>
           <Link
             to="/"
@@ -29,4 +29,4 @@ const NotAuthorized = () => {
   );
 };
 
-export default NotAuthorized;
+export default PageNotFound;

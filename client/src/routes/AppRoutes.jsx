@@ -4,6 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import ProtectedRoute from "./ProtectedRoute";
 import RoleProtectedRoute from "./RoleProtectedRoute";
 import SuspenseLoader from "../components/SuspenseLoader";
+import PageNotFound from "../pages/PageNotFound";
 
 // Lazy load all components
 const Register = lazy(() => import("../pages/Register"));
@@ -73,6 +74,7 @@ const AppRoutes = () => {
           />
         </Route>
         <Route path="/not-authorized" element={<NotAuthorized />} />
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
     </Suspense>
   );
