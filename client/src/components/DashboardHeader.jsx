@@ -35,7 +35,7 @@ const DashboardHeader = () => {
 
   return (
     <>
-      <header className="flex justify-between items-center bg-white4 py-5 px-4 md:px-10 lg:px-10 font-Inter">
+      <header className="flex justify-between items-center bg-white py-5 px-4 md:px-10 lg:px-10 font-Cormorant shadow-sm border-b border-gray-100">
         <img
           src={logo}
           alt="logo"
@@ -45,7 +45,7 @@ const DashboardHeader = () => {
 
         <div className="relative" ref={dropdownRef}>
           <IoSettingsOutline
-            className="text-3xl cursor-pointer hover:text-blue-600 transition-colors"
+            className="text-3xl cursor-pointer hover:text-[#F7418D] transition-colors duration-200"
             onClick={() => setDropdownOpen(!dropdownOpen)}
           />
 

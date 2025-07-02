@@ -168,7 +168,7 @@ const MentorDashboard = () => {
               />
             </svg>
           </button>
-          <h1 className="text-lg font-semibold text-gray-800">
+          <h1 className="text-lg font-Cormorant font-semibold text-gray-800">
             Mentor Dashboard
           </h1>
           <div className="w-6" />
@@ -177,17 +177,17 @@ const MentorDashboard = () => {
         {/* Desktop Header and Content */}
         <div className="px-4 lg:px-8 py-4 lg:py-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h1 className="hidden lg:block text-2xl font-bold text-gray-800">
+            <h1 className="hidden lg:block text-3xl font-Cormorant font-bold text-gray-900">
               Mentor Dashboard
             </h1>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
               <button
                 onClick={fetchAllDoubts}
                 disabled={refreshing}
-                className={`px-3 py-2 rounded-lg transition-colors text-sm cursor-pointer flex items-center gap-2 w-full sm:w-auto justify-center ${
+                className={`px-4 py-2 rounded-lg transition-all duration-200 text-sm cursor-pointer flex items-center gap-2 w-full sm:w-auto justify-center font-OpenSans ${
                   refreshing
                     ? "bg-gray-400 text-white cursor-not-allowed"
-                    : "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-black text-white hover:bg-gray-800 active:scale-[94%]"
                 }`}
                 title="Refresh doubts and comment counts"
               >
@@ -228,18 +228,18 @@ const MentorDashboard = () => {
                 filteredDoubts.map((doubt) => (
                   <div
                     key={doubt._id}
-                    className="bg-white rounded-lg p-4 lg:p-6 shadow border border-gray-200 hover:shadow-md transition-shadow"
+                    className="bg-white rounded-xl p-4 lg:p-6 shadow-sm border border-gray-200 hover:shadow-md hover:scale-[101%] transition-all duration-300"
                   >
                     <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-4 gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 lg:gap-3 mb-2">
-                          <h2 className="text-base lg:text-lg font-semibold text-gray-800 break-words">
+                          <h2 className="text-base lg:text-lg font-Cormorant font-semibold text-gray-800 break-words">
                             {doubt.title.length > 85
                               ? `${doubt.title.slice(0, 85)}...`
                               : doubt.title}
                           </h2>
                           <span
-                            className={`text-xs px-3 py-1 rounded-full font-medium self-start ${
+                            className={`text-xs px-3 py-1 rounded-full font-medium self-start font-OpenSans ${
                               doubt.status === "resolved"
                                 ? "bg-green-100 text-green-700"
                                 : "bg-orange-100 text-orange-700"
@@ -251,7 +251,7 @@ const MentorDashboard = () => {
                           </span>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs lg:text-sm text-gray-500 mb-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs lg:text-sm text-gray-500 mb-3 font-Cormorant">
                           <span className="truncate">
                             <FaUser className="inline-block mr-1" />{" "}
                             {doubt.student?.name || "Unknown Student"}
