@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import apiInstance from "../api/apiInstance";
 import { AuthContext } from "../context/AuthContext";
+import MentorComments from "../components/MentorComments";
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
@@ -11,18 +12,13 @@ const StudentDashboard = () => {
   const [doubts, setDoubts] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedDoubt, setSelectedDoubt] = useState(null);
-  const [comments, setComments] = useState([]);
-  const [replyText, setReplyText] = useState("");
-  const [replyToCommentId, setReplyToCommentId] = useState(null);
-  const [editingCommentId, setEditingCommentId] = useState(null);
-  const [editText, setEditText] = useState("");
-  const [loadingComments, setLoadingComments] = useState(false);
   const [editingDoubt, setEditingDoubt] = useState(null);
   const [editDoubtForm, setEditDoubtForm] = useState({
     title: "",
     description: "",
     screenshot: "",
   });
+  const [commentCounts, setCommentCounts] = useState({});
 
   useEffect(() => {
     fetchDoubts();
@@ -37,66 +33,15 @@ const StudentDashboard = () => {
     }
   };
 
-  const fetchComments = async (doubtId) => {
-    setLoadingComments(true);
-    try {
-      const res = await apiInstance.get(`/comments/${doubtId}`);
-      setComments(res.data);
-    } catch {
-      toast.error("Failed to fetch comments");
-    } finally {
-      setLoadingComments(false);
-    }
-  };
-
   const handleOpenOverlay = (doubt) => {
     setSelectedDoubt(doubt);
-    fetchComments(doubt._id);
   };
 
-  const handleReply = async () => {
-    if (!replyText.trim()) return;
-    try {
-      await apiInstance.post(`/comments/${selectedDoubt._id}`, {
-        text: replyText,
-        parentComment: replyToCommentId || null,
-      });
-      toast.success("Reply added");
-      setReplyText("");
-      setReplyToCommentId(null);
-      fetchComments(selectedDoubt._id);
-    } catch (err) {
-      console.error("Reply error:", err);
-      toast.error("Failed to post reply");
-    }
-  };
-
-  const handleEdit = async () => {
-    if (!editText.trim()) return;
-    try {
-      await apiInstance.patch(`/comments/${editingCommentId}`, {
-        text: editText,
-      });
-      toast.success("Comment updated");
-      setEditingCommentId(null);
-      setEditText("");
-      fetchComments(selectedDoubt._id);
-    } catch (err) {
-      console.error("Edit error:", err);
-      toast.error("Failed to edit comment");
-    }
-  };
-
-  const handleDelete = async (commentId) => {
-    if (!window.confirm("Delete this comment?")) return;
-    try {
-      await apiInstance.delete(`/comments/${commentId}`);
-      toast.success("Comment deleted");
-      fetchComments(selectedDoubt._id);
-    } catch (err) {
-      console.error("Delete error:", err);
-      toast.error("Failed to delete comment");
-    }
+  const updateCommentCount = (doubtId, count) => {
+    setCommentCounts((prev) => ({
+      ...prev,
+      [doubtId]: count,
+    }));
   };
 
   const handleToggleResolve = async () => {
@@ -178,100 +123,6 @@ const StudentDashboard = () => {
       toast.error("Failed to delete doubt");
     }
   };
-
-  const renderComment = (comment, depth = 0) => (
-    <div key={comment._id} className={`${depth > 0 ? "ml-8 mt-3" : "mt-3"}`}>
-      <div className="bg-gray-50 p-4 rounded-lg border">
-        <div className="flex justify-between items-start mb-2">
-          <div className="flex items-center gap-3">
-            <strong className="text-gray-800">{comment.author.name}</strong>
-            <span
-              className={`text-xs px-2 py-1 rounded-full font-medium ${
-                comment.author.role === "mentor"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-blue-100 text-blue-700"
-              }`}
-            >
-              {comment.author.role === "mentor" ? "🎓 Mentor" : "👤 Student"}
-            </span>
-            <span className="text-gray-400 text-xs">
-              {new Date(comment.createdAt).toLocaleString()}
-            </span>
-          </div>
-          {/* Only show edit/delete for user's own comments */}
-          {user && comment.author._id === user.id && (
-            <div className="flex gap-2 text-xs">
-              <button
-                onClick={() => {
-                  setEditingCommentId(comment._id);
-                  setEditText(comment.text);
-                }}
-                className="text-blue-600 hover:text-blue-800 font-medium"
-              >
-                ✏️ Edit
-              </button>
-              <button
-                onClick={() => handleDelete(comment._id)}
-                className="text-red-600 hover:text-red-800 font-medium"
-              >
-                🗑️ Delete
-              </button>
-            </div>
-          )}
-        </div>
-
-        {editingCommentId === comment._id ? (
-          <div className="mt-3">
-            <textarea
-              value={editText}
-              onChange={(e) => setEditText(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows="3"
-            />
-            <div className="flex gap-2 mt-2">
-              <button
-                onClick={handleEdit}
-                className="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700 transition-colors"
-              >
-                💾 Save
-              </button>
-              <button
-                onClick={() => {
-                  setEditingCommentId(null);
-                  setEditText("");
-                }}
-                className="bg-gray-500 text-white px-3 py-1 rounded text-xs hover:bg-gray-600 transition-colors"
-              >
-                ❌ Cancel
-              </button>
-            </div>
-          </div>
-        ) : (
-          <p className="text-gray-700 leading-relaxed">{comment.text}</p>
-        )}
-
-        {/* Only show reply button if the comment is not from the current user */}
-        {user &&
-          comment.author._id !== user.id &&
-          editingCommentId !== comment._id && (
-            <button
-              onClick={() => {
-                setReplyToCommentId(comment._id);
-              }}
-              className="text-xs text-blue-600 mt-3 hover:text-blue-800 font-medium inline-flex items-center gap-1"
-            >
-              ↪️ Reply
-            </button>
-          )}
-      </div>
-
-      {comment.replies?.length > 0 && (
-        <div className="mt-2">
-          {comment.replies.map((reply) => renderComment(reply, depth + 1))}
-        </div>
-      )}
-    </div>
-  );
 
   const filteredDoubts = doubts.filter((d) =>
     statusFilter === "all" ? true : d.status === statusFilter
@@ -388,7 +239,10 @@ const StudentDashboard = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <span>💬 {doubt.commentCount || 0} Comments</span>
+                    <span>
+                      💬 {commentCounts[doubt._id] || doubt.commentCount || 0}{" "}
+                      Comments
+                    </span>
                     <span>📚 {doubt.subject || "General"}</span>
                   </div>
 
@@ -398,6 +252,15 @@ const StudentDashboard = () => {
                       className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm cursor-pointer"
                     >
                       View Details
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditDoubt(doubt);
+                      }}
+                      className="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-xs sm:text-sm cursor-pointer"
+                    >
+                      ✏️ Edit
                     </button>
                     <button
                       onClick={async (e) => {
@@ -422,9 +285,16 @@ const StudentDashboard = () => {
                           : "bg-green-600 hover:bg-green-700 text-white"
                       }`}
                     >
-                      {doubt.status === "resolved"
-                        ? "Reopen"
-                        : "Mark as Resolved"}
+                      {doubt.status === "resolved" ? "Reopen" : "Resolve"}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteDoubt(doubt._id);
+                      }}
+                      className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs sm:text-sm cursor-pointer"
+                    >
+                      🗑️ Delete
                     </button>
                   </div>
                 </div>
@@ -513,66 +383,18 @@ const StudentDashboard = () => {
                   <h3 className="font-semibold text-gray-800 mb-4">
                     Comments & Discussion:
                   </h3>
-                  {loadingComments ? (
-                    <div className="text-center py-4">
-                      <p className="text-gray-500">Loading comments...</p>
-                    </div>
-                  ) : comments.length ? (
-                    <div className="space-y-3">
-                      {comments.map((c) => renderComment(c))}
-                    </div>
+                  {selectedDoubt._id ? (
+                    <MentorComments
+                      doubtId={selectedDoubt._id}
+                      onCommentsUpdate={(count) =>
+                        updateCommentCount(selectedDoubt._id, count)
+                      }
+                    />
                   ) : (
-                    <p className="text-gray-500 text-sm italic">
-                      No comments yet. Start the discussion!
+                    <p className="text-gray-500 text-sm">
+                      Unable to load comments
                     </p>
                   )}
-                </div>
-
-                {/* Reply Section */}
-                <div className="border-t pt-4">
-                  {replyToCommentId && (
-                    <div className="bg-blue-50 p-3 rounded-lg mb-3 text-sm">
-                      <span className="text-blue-600 font-medium">
-                        Replying to:{" "}
-                        {comments.find(
-                          (c) =>
-                            c._id === replyToCommentId ||
-                            c.replies?.some((r) => r._id === replyToCommentId)
-                        )?.author?.name || "comment"}
-                      </span>
-                      <button
-                        onClick={() => setReplyToCommentId(null)}
-                        className="ml-2 text-red-500 hover:text-red-700 font-medium cursor-pointer"
-                      >
-                        ✖ Cancel
-                      </button>
-                    </div>
-                  )}
-                  <div className="flex gap-3">
-                    <input
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                      className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder={
-                        replyToCommentId
-                          ? "Write your reply..."
-                          : "Write a comment..."
-                      }
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          handleReply();
-                        }
-                      }}
-                    />
-                    <button
-                      onClick={handleReply}
-                      disabled={!replyText.trim()}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                    >
-                      {replyToCommentId ? "Reply" : "Comment"}
-                    </button>
-                  </div>
                 </div>
 
                 {/* Action Buttons */}
