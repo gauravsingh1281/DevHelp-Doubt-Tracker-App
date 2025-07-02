@@ -15,6 +15,15 @@ const MentorDashboard = () => {
     try {
       const res = await apiInstance.get("/doubts");
       setDoubts(res.data);
+
+      // Initialize comment counts from the backend data
+      const initialCommentCounts = {};
+      res.data.forEach((doubt) => {
+        if (doubt.commentCount !== undefined) {
+          initialCommentCounts[doubt._id] = doubt.commentCount;
+        }
+      });
+      setCommentCounts(initialCommentCounts);
     } catch (err) {
       console.error("Error fetching doubts:", err);
       toast.error("Failed to load doubts");
@@ -50,6 +59,7 @@ const MentorDashboard = () => {
   };
 
   const updateCommentCount = useCallback((doubtId, count) => {
+    console.log("Updating comment count for doubt:", doubtId, "to:", count);
     setCommentCounts((prev) => ({
       ...prev,
       [doubtId]: count,
@@ -175,8 +185,11 @@ const MentorDashboard = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <span>� {commentCounts[doubt._id] || 0} Comments</span>
-                    <span>� {doubt.subject || "General"}</span>
+                    <span>
+                      💬 {commentCounts[doubt._id] || doubt.commentCount || 0}{" "}
+                      Comments
+                    </span>
+                    <span>📚 {doubt.subject || "General"}</span>
                   </div>
 
                   <div className="flex gap-2">

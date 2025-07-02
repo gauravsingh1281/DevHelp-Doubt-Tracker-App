@@ -25,9 +25,10 @@ export const getMyDoubts = async (req, res) => {
       createdAt: -1,
     });
 
-    // Get comment counts for each doubt
+    // Get comment counts for each doubt (including replies)
     const doubtsWithCommentCount = await Promise.all(
       doubts.map(async (doubt) => {
+        // Count all comments and replies for this doubt
         const commentCount = await Comment.countDocuments({ doubt: doubt._id });
         return {
           ...doubt.toObject(),
@@ -49,7 +50,19 @@ export const getAllDoubts = async (req, res) => {
     const doubts = await Doubt.find(filter)
       .populate("student", "name email")
       .sort({ createdAt: -1 });
-    res.json(doubts);
+
+    // Get comment counts for each doubt (including replies)
+    const doubtsWithCommentCount = await Promise.all(
+      doubts.map(async (doubt) => {
+        const commentCount = await Comment.countDocuments({ doubt: doubt._id });
+        return {
+          ...doubt.toObject(),
+          commentCount,
+        };
+      })
+    );
+
+    res.json(doubtsWithCommentCount);
   } catch (err) {
     res.status(500).json({ msg: "Error fetching doubts", error: err.message });
   }

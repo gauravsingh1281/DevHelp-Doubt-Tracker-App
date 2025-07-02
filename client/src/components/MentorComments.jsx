@@ -14,22 +14,41 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
   const [editText, setEditText] = useState("");
 
   const fetchComments = useCallback(async () => {
-    if (!doubtId) return;
+    if (!doubtId) {
+      console.log("fetchComments called but no doubtId provided");
+      return;
+    }
 
+    console.log("Starting fetchComments for doubtId:", doubtId);
     setLoading(true);
     setError(null);
     try {
-      console.log("Fetching comments for doubt:", doubtId);
+      console.log("Making API call to /comments/" + doubtId);
       const res = await apiInstance.get(`/comments/${doubtId}`);
+      console.log("API response status:", res.status);
       console.log("Comments received:", res.data);
-      setComments(res.data);
+      console.log("Number of comments:", res.data?.length || 0);
+      setComments(res.data || []);
     } catch (err) {
       console.error("Error fetching comments:", err);
+      console.error("Error response:", err.response);
+      console.error("Error status:", err.response?.status);
+      console.error("Error data:", err.response?.data);
+
       setError(err.message);
+      setComments([]); // Reset comments on error
+
       if (err.response?.status === 401) {
         toast.error("Please login to view comments");
+      } else if (err.response?.status === 404) {
+        toast.error("Comments not found");
+      } else if (err.response?.status === 403) {
+        toast.error("Access denied");
       } else {
-        toast.error("Failed to fetch comments");
+        toast.error(
+          "Failed to fetch comments: " +
+            (err.response?.data?.msg || err.message)
+        );
       }
     } finally {
       setLoading(false);
@@ -38,13 +57,23 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
 
   // Update comment count when comments change
   useEffect(() => {
-    if (onCommentsUpdate && comments.length >= 0) {
+    if (onCommentsUpdate && Array.isArray(comments)) {
       const totalCount = comments.reduce((total, comment) => {
         return total + 1 + (comment.replies?.length || 0);
       }, 0);
-      onCommentsUpdate(totalCount);
+      console.log(
+        "Updating comment count to:",
+        totalCount,
+        "for doubt:",
+        doubtId
+      );
+      try {
+        onCommentsUpdate(totalCount);
+      } catch (error) {
+        console.error("Error updating comment count:", error);
+      }
     }
-  }, [comments, onCommentsUpdate]);
+  }, [comments, onCommentsUpdate, doubtId]);
 
   const handleAddComment = async () => {
     if (!replyText.trim()) return;
@@ -56,7 +85,7 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
       toast.success("Comment added");
       setReplyText("");
       setReplyToCommentId(null);
-      fetchComments();
+      await fetchComments(); // Fetch updated comments
     } catch (err) {
       console.error("Error adding comment:", err);
       toast.error("Failed to add comment");
@@ -72,7 +101,7 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
       toast.success("Comment updated");
       setEditingCommentId(null);
       setEditText("");
-      fetchComments();
+      await fetchComments(); // Fetch updated comments
     } catch (err) {
       console.error("Error editing comment:", err);
       toast.error("Failed to edit comment");
@@ -86,7 +115,7 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
     try {
       await apiInstance.delete(`/comments/${commentId}`);
       toast.success("Comment deleted");
-      fetchComments();
+      await fetchComments(); // Fetch updated comments
     } catch (err) {
       console.error("Error deleting comment:", err);
       toast.error("Failed to delete comment");
@@ -107,17 +136,35 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
     const isCurrentUser = user && comment.author._id === user.id;
     const canReply = user && comment.author._id !== user.id; // Users cannot reply to their own comments
     const isEditing = editingCommentId === comment._id;
+    const isReply = depth > 0;
 
     return (
-      <div key={comment._id} className={`ml-${depth * 4} mt-2`}>
-        <div className="bg-gray-50 p-3 rounded-lg">
+      <div key={comment._id} className={`${isReply ? "ml-8 mt-3" : "mt-3"}`}>
+        <div
+          className={`p-4 rounded-lg border-l-4 ${
+            isReply
+              ? "bg-blue-50 border-l-blue-400 border border-blue-200"
+              : "bg-gray-50 border-l-gray-400 border border-gray-200"
+          }`}
+        >
           <div className="flex items-center gap-2 mb-2">
+            {/* Comment/Reply Type Indicator */}
+            <span
+              className={`text-xs px-2 py-1 rounded-full font-medium ${
+                isReply
+                  ? "bg-blue-200 text-blue-800"
+                  : "bg-gray-200 text-gray-700"
+              }`}
+            >
+              {isReply ? "↪️ Reply" : "💬 Comment"}
+            </span>
+
             <strong className="text-gray-800">{comment.author.name}</strong>
             <span
               className={`text-xs px-2 py-1 rounded-full ${
                 comment.author.role === "mentor"
                   ? "bg-green-100 text-green-700"
-                  : "bg-blue-100 text-blue-700"
+                  : "bg-purple-100 text-purple-700"
               }`}
             >
               {comment.author.role === "mentor" ? "🎓 Mentor" : "👤 Student"}
@@ -130,69 +177,90 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
           {/* Comment Text or Edit Form */}
           {isEditing ? (
             <div className="mb-2">
+              <label className="block text-xs text-gray-600 mb-1">
+                Editing {isReply ? "reply" : "comment"}:
+              </label>
               <textarea
                 value={editText}
                 onChange={(e) => setEditText(e.target.value)}
-                className="w-full border rounded px-2 py-1 text-sm resize-none"
-                rows="2"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows="3"
+                placeholder={`Update your ${isReply ? "reply" : "comment"}...`}
               />
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => handleEditComment(comment._id, editText)}
-                  className="text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 cursor-pointer"
+                  className="text-xs bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 cursor-pointer transition-colors"
                 >
-                  Save
+                  💾 Save {isReply ? "Reply" : "Comment"}
                 </button>
                 <button
                   onClick={cancelEdit}
-                  className="text-xs bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600 cursor-pointer"
+                  className="text-xs bg-gray-500 text-white px-3 py-1 rounded-lg hover:bg-gray-600 cursor-pointer transition-colors"
                 >
-                  Cancel
+                  ❌ Cancel
                 </button>
               </div>
             </div>
           ) : (
-            <p className="text-gray-700 text-sm mb-2">{comment.text}</p>
+            <div
+              className={`${isReply ? "pl-4 border-l-2 border-blue-300" : ""}`}
+            >
+              <p className="text-gray-700 text-sm leading-relaxed">
+                {comment.text}
+              </p>
+            </div>
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-2 text-xs">
+          <div className="flex gap-3 text-xs mt-3 pt-2 border-t border-gray-200">
             {canReply && (
               <button
                 onClick={() => setReplyToCommentId(comment._id)}
-                className="text-blue-500 hover:text-blue-700 font-medium cursor-pointer"
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium cursor-pointer transition-colors"
               >
-                ↪️ Reply
+                ↪️ Reply to {isReply ? "reply" : "comment"}
               </button>
             )}
             {isCurrentUser && !isEditing && (
               <>
                 <button
                   onClick={() => startEditComment(comment)}
-                  className="text-orange-500 hover:text-orange-700 font-medium cursor-pointer"
+                  className="flex items-center gap-1 text-orange-600 hover:text-orange-800 font-medium cursor-pointer transition-colors"
                 >
-                  ✏️ Edit
+                  ✏️ Edit {isReply ? "reply" : "comment"}
                 </button>
                 <button
                   onClick={() => handleDeleteComment(comment._id)}
-                  className="text-red-500 hover:text-red-700 font-medium cursor-pointer"
+                  className="flex items-center gap-1 text-red-600 hover:text-red-800 font-medium cursor-pointer transition-colors"
                 >
-                  🗑️ Delete
+                  🗑️ Delete {isReply ? "reply" : "comment"}
                 </button>
               </>
             )}
           </div>
         </div>
-        {comment.replies?.length > 0 &&
-          comment.replies.map((reply) => renderComment(reply, depth + 1))}
+
+        {/* Render nested replies */}
+        {comment.replies?.length > 0 && (
+          <div className="mt-2 space-y-2">
+            {comment.replies.map((reply) => renderComment(reply, depth + 1))}
+          </div>
+        )}
       </div>
     );
   };
 
   useEffect(() => {
+    console.log("MentorComments useEffect triggered:", {
+      doubtId,
+      hasDoubtId: !!doubtId,
+    });
     if (doubtId) {
-      console.log("MentorComments useEffect triggered for doubtId:", doubtId);
+      console.log("Calling fetchComments for doubtId:", doubtId);
       fetchComments();
+    } else {
+      console.log("No doubtId provided, skipping fetchComments");
     }
   }, [doubtId, fetchComments]);
 

@@ -1,5 +1,5 @@
 // imports
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import apiInstance from "../api/apiInstance";
@@ -28,6 +28,15 @@ const StudentDashboard = () => {
     try {
       const res = await apiInstance.get("/doubts/my");
       setDoubts(res.data);
+
+      // Initialize comment counts from the backend data
+      const initialCommentCounts = {};
+      res.data.forEach((doubt) => {
+        if (doubt.commentCount !== undefined) {
+          initialCommentCounts[doubt._id] = doubt.commentCount;
+        }
+      });
+      setCommentCounts(initialCommentCounts);
     } catch {
       toast.error("Failed to load doubts");
     }
@@ -37,12 +46,13 @@ const StudentDashboard = () => {
     setSelectedDoubt(doubt);
   };
 
-  const updateCommentCount = (doubtId, count) => {
+  const updateCommentCount = useCallback((doubtId, count) => {
+    console.log("Updating comment count for doubt:", doubtId, "to:", count);
     setCommentCounts((prev) => ({
       ...prev,
       [doubtId]: count,
     }));
-  };
+  }, []);
 
   const handleToggleResolve = async () => {
     if (!selectedDoubt) return;
