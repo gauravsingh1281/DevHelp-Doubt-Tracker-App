@@ -4,10 +4,8 @@ import { AuthContext } from "../context/AuthContext";
 import ProtectedRoute from "./ProtectedRoute";
 import RoleProtectedRoute from "./RoleProtectedRoute";
 import SuspenseLoader from "../components/SuspenseLoader";
-import PageNotFound from "../pages/PageNotFound";
-import PageUnderDev from "../pages/PageUnderDev";
 
-// Lazy load all components
+// Lazy load
 const Register = lazy(() => import("../pages/Register"));
 const Login = lazy(() => import("../pages/Login"));
 const CreateDoubt = lazy(() => import("../pages/CreateDoubt"));
@@ -17,6 +15,8 @@ const DashboardLayout = lazy(() => import("../layout/DashboardLayout"));
 const StudentDashboard = lazy(() => import("../pages/StudentDashboard"));
 const MentorDashboard = lazy(() => import("../pages/MentorDashboard"));
 const NotAuthorized = lazy(() => import("../pages/NotAuthorized"));
+const PageNotFound = lazy(() => import("../pages/PageNotFound"));
+const PageUnderDev = lazy(() => import("../pages/PageUnderDev"));
 
 const AppRoutes = () => {
   const DashboardRedirect = () => {
