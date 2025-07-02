@@ -395,18 +395,9 @@ const StudentDashboard = () => {
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => handleOpenOverlay(doubt)}
-                      className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                      className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm cursor-pointer"
                     >
                       View Details
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditDoubt(doubt);
-                      }}
-                      className="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-xs sm:text-sm"
-                    >
-                      ✏️ Edit
                     </button>
                     <button
                       onClick={async (e) => {
@@ -425,22 +416,15 @@ const StudentDashboard = () => {
                           toast.error("Failed to update doubt status");
                         }
                       }}
-                      className={`px-3 py-2 rounded-lg transition-colors text-xs sm:text-sm ${
+                      className={`px-3 py-2 rounded-lg transition-colors text-xs sm:text-sm cursor-pointer ${
                         doubt.status === "resolved"
                           ? "bg-orange-600 hover:bg-orange-700 text-white"
                           : "bg-green-600 hover:bg-green-700 text-white"
                       }`}
                     >
-                      {doubt.status === "resolved" ? "Reopen" : "Resolve"}
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteDoubt(doubt._id);
-                      }}
-                      className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs sm:text-sm"
-                    >
-                      🗑️ Delete
+                      {doubt.status === "resolved"
+                        ? "Reopen"
+                        : "Mark as Resolved"}
                     </button>
                   </div>
                 </div>
@@ -558,7 +542,7 @@ const StudentDashboard = () => {
                       </span>
                       <button
                         onClick={() => setReplyToCommentId(null)}
-                        className="ml-2 text-red-500 hover:text-red-700 font-medium"
+                        className="ml-2 text-red-500 hover:text-red-700 font-medium cursor-pointer"
                       >
                         ✖ Cancel
                       </button>
@@ -574,7 +558,7 @@ const StudentDashboard = () => {
                           ? "Write your reply..."
                           : "Write a comment..."
                       }
-                      onKeyPress={(e) => {
+                      onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
                           handleReply();
@@ -584,7 +568,7 @@ const StudentDashboard = () => {
                     <button
                       onClick={handleReply}
                       disabled={!replyText.trim()}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                     >
                       {replyToCommentId ? "Reply" : "Comment"}
                     </button>
@@ -595,13 +579,13 @@ const StudentDashboard = () => {
                 <div className="flex flex-wrap gap-3 pt-4 border-t">
                   <button
                     onClick={() => handleEditDoubt(selectedDoubt)}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
+                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm cursor-pointer"
                   >
                     ✏️ Edit Doubt
                   </button>
                   <button
                     onClick={handleToggleResolve}
-                    className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                    className={`px-4 py-2 rounded-lg transition-colors text-sm cursor-pointer ${
                       selectedDoubt.status === "resolved"
                         ? "bg-orange-600 hover:bg-orange-700 text-white"
                         : "bg-green-600 hover:bg-green-700 text-white"
@@ -613,13 +597,13 @@ const StudentDashboard = () => {
                   </button>
                   <button
                     onClick={() => handleDeleteDoubt(selectedDoubt._id)}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm cursor-pointer"
                   >
                     🗑️ Delete Doubt
                   </button>
                   <button
                     onClick={() => setSelectedDoubt(null)}
-                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm"
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm cursor-pointer"
                   >
                     Close
                   </button>
@@ -644,7 +628,7 @@ const StudentDashboard = () => {
                       screenshot: "",
                     });
                   }}
-                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                  className="text-gray-500 hover:text-gray-700 text-2xl cursor-pointer"
                 >
                   ✖
                 </button>
@@ -708,7 +692,7 @@ const StudentDashboard = () => {
                 <div className="flex gap-3 pt-4 border-t">
                   <button
                     onClick={handleUpdateDoubt}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer"
                   >
                     💾 Update Doubt
                   </button>
@@ -721,7 +705,7 @@ const StudentDashboard = () => {
                         screenshot: "",
                       });
                     }}
-                    className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                    className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -734,7 +718,7 @@ const StudentDashboard = () => {
         {/* Floating Action Button */}
         <button
           onClick={() => navigate("/doubts/create")}
-          className="fixed bottom-6 right-6 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors font-medium"
+          className="fixed bottom-6 right-6 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer"
         >
           + Ask a Doubt
         </button>

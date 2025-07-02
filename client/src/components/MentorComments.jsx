@@ -139,13 +139,13 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => handleEditComment(comment._id, editText)}
-                  className="text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+                  className="text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 cursor-pointer"
                 >
                   Save
                 </button>
                 <button
                   onClick={cancelEdit}
-                  className="text-xs bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600"
+                  className="text-xs bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600 cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -160,7 +160,7 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
             {canReply && (
               <button
                 onClick={() => setReplyToCommentId(comment._id)}
-                className="text-blue-500 hover:text-blue-700 font-medium"
+                className="text-blue-500 hover:text-blue-700 font-medium cursor-pointer"
               >
                 ↪️ Reply
               </button>
@@ -169,13 +169,13 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
               <>
                 <button
                   onClick={() => startEditComment(comment)}
-                  className="text-orange-500 hover:text-orange-700 font-medium"
+                  className="text-orange-500 hover:text-orange-700 font-medium cursor-pointer"
                 >
                   ✏️ Edit
                 </button>
                 <button
                   onClick={() => handleDeleteComment(comment._id)}
-                  className="text-red-500 hover:text-red-700 font-medium"
+                  className="text-red-500 hover:text-red-700 font-medium cursor-pointer"
                 >
                   🗑️ Delete
                 </button>
@@ -219,7 +219,9 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
         {comments.length > 0 ? (
           comments.map((comment) => renderComment(comment))
         ) : (
-          <p className="italic text-gray-500 text-sm">No comments yet.</p>
+          <p className="italic text-gray-500 text-sm">
+            No comments yet. Start the discussion!
+          </p>
         )}
       </div>
 
@@ -247,7 +249,7 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
             </span>
             <button
               onClick={() => setReplyToCommentId(null)}
-              className="ml-2 text-red-500 hover:text-red-700"
+              className="ml-2 text-red-500 hover:text-red-700 cursor-pointer"
             >
               ✖ Cancel
             </button>
@@ -262,7 +264,7 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
             }
             className="flex-1 border rounded px-3 py-2 text-sm resize-none"
             rows="3"
-            onKeyPress={(e) => {
+            onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 handleAddComment();
@@ -272,7 +274,7 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
           <button
             onClick={handleAddComment}
             disabled={!replyText.trim()}
-            className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed self-start"
+            className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed self-start cursor-pointer"
           >
             {replyToCommentId ? "Reply" : "Comment"}
           </button>

@@ -182,7 +182,7 @@ const MentorDashboard = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleOpenDetails(doubt)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm cursor-pointer"
                     >
                       View Details
                     </button>
@@ -190,7 +190,7 @@ const MentorDashboard = () => {
                       onClick={() =>
                         handleToggleResolve(doubt._id, doubt.status)
                       }
-                      className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                      className={`px-4 py-2 rounded-lg transition-colors text-sm cursor-pointer ${
                         doubt.status === "resolved"
                           ? "bg-orange-600 hover:bg-orange-700 text-white"
                           : "bg-green-600 hover:bg-green-700 text-white"
@@ -233,7 +233,7 @@ const MentorDashboard = () => {
                 </div>
                 <button
                   onClick={() => setSelectedDoubt(null)}
-                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                  className="text-gray-500 hover:text-gray-700 text-2xl cursor-pointer"
                 >
                   ✖
                 </button>
@@ -310,7 +310,7 @@ const MentorDashboard = () => {
                         selectedDoubt.status
                       )
                     }
-                    className={`px-6 py-2 rounded-lg transition-colors ${
+                    className={`px-6 py-2 rounded-lg transition-colors cursor-pointer ${
                       selectedDoubt.status === "resolved"
                         ? "bg-orange-600 hover:bg-orange-700 text-white"
                         : "bg-green-600 hover:bg-green-700 text-white"
@@ -322,7 +322,7 @@ const MentorDashboard = () => {
                   </button>
                   <button
                     onClick={() => setSelectedDoubt(null)}
-                    className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                    className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer"
                   >
                     Close
                   </button>
