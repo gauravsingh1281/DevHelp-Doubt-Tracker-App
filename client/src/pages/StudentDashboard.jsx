@@ -1,4 +1,3 @@
-// imports
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -26,22 +25,16 @@ const StudentDashboard = () => {
   }, []);
 
   const fetchDoubts = async () => {
-    console.log("Fetching doubts and refreshing comment counts...");
     setRefreshing(true);
     try {
       const res = await apiInstance.get("/doubts/my");
       setDoubts(res.data);
-      console.log("Doubts fetched:", res.data.length);
 
       // Initialize comment counts from the backend data
       const initialCommentCounts = {};
       res.data.forEach((doubt) => {
         if (doubt.commentCount !== undefined) {
           initialCommentCounts[doubt._id] = doubt.commentCount;
-          console.log(
-            `Backend comment count for doubt ${doubt._id}:`,
-            doubt.commentCount
-          );
         }
       });
 
@@ -51,10 +44,8 @@ const StudentDashboard = () => {
           ...initialCommentCounts,
           ...prev, // Keep any real-time updates that might be higher than backend data
         };
-        console.log("Merged comment counts:", merged);
         return merged;
       });
-      toast.success("Doubts and comment counts refreshed!");
     } catch {
       toast.error("Failed to load doubts");
     } finally {
@@ -74,7 +65,6 @@ const StudentDashboard = () => {
   };
 
   const updateCommentCount = (doubtId, count) => {
-    console.log("Updating comment count for doubt:", doubtId, "to:", count);
     setCommentCounts((prev) => ({
       ...prev,
       [doubtId]: count,

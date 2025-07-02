@@ -13,22 +13,16 @@ const MentorDashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchAllDoubts = async () => {
-    console.log("Fetching all doubts and refreshing comment counts...");
     setRefreshing(true);
     try {
       const res = await apiInstance.get("/doubts");
       setDoubts(res.data);
-      console.log("Doubts fetched:", res.data.length);
 
       // Initialize comment counts from the backend data
       const initialCommentCounts = {};
       res.data.forEach((doubt) => {
         if (doubt.commentCount !== undefined) {
           initialCommentCounts[doubt._id] = doubt.commentCount;
-          console.log(
-            `Backend comment count for doubt ${doubt._id}:`,
-            doubt.commentCount
-          );
         }
       });
 
@@ -37,10 +31,9 @@ const MentorDashboard = () => {
           ...initialCommentCounts,
           ...prev, // Keep any real-time updates that might be higher than backend data
         };
-        console.log("Merged comment counts:", merged);
+
         return merged;
       });
-      toast.success("Doubts and comment counts refreshed!");
     } catch (err) {
       console.error("Error fetching doubts:", err);
       toast.error("Failed to load doubts");
@@ -78,7 +71,6 @@ const MentorDashboard = () => {
   };
 
   const updateCommentCount = useCallback((doubtId, count) => {
-    console.log("Updating comment count for doubt:", doubtId, "to:", count);
     setCommentCounts((prev) => ({
       ...prev,
       [doubtId]: count,
