@@ -10,23 +10,42 @@ const MentorDashboard = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedDoubt, setSelectedDoubt] = useState(null);
   const [commentCounts, setCommentCounts] = useState({});
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchAllDoubts = async () => {
+    console.log("Fetching all doubts and refreshing comment counts...");
+    setRefreshing(true);
     try {
       const res = await apiInstance.get("/doubts");
       setDoubts(res.data);
+      console.log("Doubts fetched:", res.data.length);
 
       // Initialize comment counts from the backend data
       const initialCommentCounts = {};
       res.data.forEach((doubt) => {
         if (doubt.commentCount !== undefined) {
           initialCommentCounts[doubt._id] = doubt.commentCount;
+          console.log(
+            `Backend comment count for doubt ${doubt._id}:`,
+            doubt.commentCount
+          );
         }
       });
-      setCommentCounts(initialCommentCounts);
+
+      setCommentCounts((prev) => {
+        const merged = {
+          ...initialCommentCounts,
+          ...prev, // Keep any real-time updates that might be higher than backend data
+        };
+        console.log("Merged comment counts:", merged);
+        return merged;
+      });
+      toast.success("Doubts and comment counts refreshed!");
     } catch (err) {
       console.error("Error fetching doubts:", err);
       toast.error("Failed to load doubts");
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -119,8 +138,22 @@ const MentorDashboard = () => {
       <main className="flex-1 px-8 py-6 relative">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">Mentor Dashboard</h1>
-          <div className="text-sm text-gray-500">
-            Total: {doubts.length} doubts
+          <div className="flex items-center gap-4">
+            <button
+              onClick={fetchAllDoubts}
+              disabled={refreshing}
+              className={`px-3 py-2 rounded-lg transition-colors text-sm cursor-pointer flex items-center gap-2 ${
+                refreshing
+                  ? "bg-gray-400 text-white cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
+              title="Refresh doubts and comment counts"
+            >
+              {refreshing ? "🔄 Refreshing..." : "🔄 Refresh"}
+            </button>
+            <div className="text-sm text-gray-500">
+              Total: {doubts.length} doubts
+            </div>
           </div>
         </div>
 

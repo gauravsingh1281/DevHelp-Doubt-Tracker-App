@@ -1,5 +1,5 @@
 // imports
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import apiInstance from "../api/apiInstance";
@@ -19,40 +19,73 @@ const StudentDashboard = () => {
     screenshot: "",
   });
   const [commentCounts, setCommentCounts] = useState({});
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchDoubts();
   }, []);
 
   const fetchDoubts = async () => {
+    console.log("Fetching doubts and refreshing comment counts...");
+    setRefreshing(true);
     try {
       const res = await apiInstance.get("/doubts/my");
       setDoubts(res.data);
+      console.log("Doubts fetched:", res.data.length);
 
       // Initialize comment counts from the backend data
       const initialCommentCounts = {};
       res.data.forEach((doubt) => {
         if (doubt.commentCount !== undefined) {
           initialCommentCounts[doubt._id] = doubt.commentCount;
+          console.log(
+            `Backend comment count for doubt ${doubt._id}:`,
+            doubt.commentCount
+          );
         }
       });
-      setCommentCounts(initialCommentCounts);
+
+      // Merge with existing comment counts to preserve real-time updates
+      setCommentCounts((prev) => {
+        const merged = {
+          ...initialCommentCounts,
+          ...prev, // Keep any real-time updates that might be higher than backend data
+        };
+        console.log("Merged comment counts:", merged);
+        return merged;
+      });
+      toast.success("Doubts and comment counts refreshed!");
     } catch {
       toast.error("Failed to load doubts");
+    } finally {
+      setRefreshing(false);
     }
   };
 
   const handleOpenOverlay = (doubt) => {
     setSelectedDoubt(doubt);
+    // Ensure comment count is initialized for this doubt when opened
+    if (doubt._id && commentCounts[doubt._id] === undefined) {
+      setCommentCounts((prev) => ({
+        ...prev,
+        [doubt._id]: doubt.commentCount || 0,
+      }));
+    }
   };
 
-  const updateCommentCount = useCallback((doubtId, count) => {
+  const updateCommentCount = (doubtId, count) => {
     console.log("Updating comment count for doubt:", doubtId, "to:", count);
     setCommentCounts((prev) => ({
       ...prev,
       [doubtId]: count,
     }));
-  }, []);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedDoubt(null);
+    // Optionally refresh doubts to sync any external changes
+    // fetchDoubts();
+  };
 
   const handleToggleResolve = async () => {
     if (!selectedDoubt) return;
@@ -75,6 +108,9 @@ const StudentDashboard = () => {
 
       // Update selected doubt
       setSelectedDoubt((prev) => ({ ...prev, status: newStatus }));
+
+      // Refresh doubts to get updated comment counts
+      fetchDoubts();
     } catch {
       toast.error("Failed to update doubt status");
     }
@@ -184,8 +220,22 @@ const StudentDashboard = () => {
           <h1 className="text-2xl font-bold text-gray-800">
             Student Dashboard
           </h1>
-          <div className="text-sm text-gray-500">
-            Total: {doubts.length} doubts
+          <div className="flex items-center gap-4">
+            <button
+              onClick={fetchDoubts}
+              disabled={refreshing}
+              className={`px-3 py-2 rounded-lg transition-colors text-sm cursor-pointer flex items-center gap-2 ${
+                refreshing
+                  ? "bg-gray-400 text-white cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
+              title="Refresh doubts and comment counts"
+            >
+              {refreshing ? "🔄 Refreshing..." : "🔄 Refresh"}
+            </button>
+            <div className="text-sm text-gray-500">
+              Total: {doubts.length} doubts
+            </div>
           </div>
         </div>
 
@@ -340,7 +390,7 @@ const StudentDashboard = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => setSelectedDoubt(null)}
+                  onClick={handleCloseModal}
                   className="text-gray-500 hover:text-gray-700 text-2xl"
                 >
                   ✖
@@ -434,7 +484,7 @@ const StudentDashboard = () => {
                     🗑️ Delete Doubt
                   </button>
                   <button
-                    onClick={() => setSelectedDoubt(null)}
+                    onClick={handleCloseModal}
                     className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm cursor-pointer"
                   >
                     Close

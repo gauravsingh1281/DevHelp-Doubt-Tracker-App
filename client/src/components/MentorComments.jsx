@@ -55,17 +55,29 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
     }
   }, [doubtId]);
 
+  // Recursive function to count all comments and nested replies
+  const countCommentsRecursively = useCallback((comments) => {
+    return comments.reduce((total, comment) => {
+      // Count the comment itself + all its nested replies
+      let count = 1; // The comment itself
+      if (comment.replies && Array.isArray(comment.replies)) {
+        count += countCommentsRecursively(comment.replies); // Recursively count nested replies
+      }
+      return total + count;
+    }, 0);
+  }, []);
+
   // Update comment count when comments change
   useEffect(() => {
     if (onCommentsUpdate && Array.isArray(comments)) {
-      const totalCount = comments.reduce((total, comment) => {
-        return total + 1 + (comment.replies?.length || 0);
-      }, 0);
+      const totalCount = countCommentsRecursively(comments);
       console.log(
         "Updating comment count to:",
         totalCount,
         "for doubt:",
-        doubtId
+        doubtId,
+        "from comments:",
+        comments
       );
       try {
         onCommentsUpdate(totalCount);
@@ -73,7 +85,7 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
         console.error("Error updating comment count:", error);
       }
     }
-  }, [comments, onCommentsUpdate, doubtId]);
+  }, [comments, onCommentsUpdate, doubtId, countCommentsRecursively]);
 
   const handleAddComment = async () => {
     if (!replyText.trim()) return;
