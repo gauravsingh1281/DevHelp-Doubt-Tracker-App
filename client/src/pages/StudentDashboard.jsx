@@ -17,6 +17,12 @@ const StudentDashboard = () => {
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editText, setEditText] = useState("");
   const [loadingComments, setLoadingComments] = useState(false);
+  const [editingDoubt, setEditingDoubt] = useState(null);
+  const [editDoubtForm, setEditDoubtForm] = useState({
+    title: "",
+    description: "",
+    screenshot: "",
+  });
 
   useEffect(() => {
     fetchDoubts();
@@ -116,6 +122,60 @@ const StudentDashboard = () => {
       setSelectedDoubt((prev) => ({ ...prev, status: newStatus }));
     } catch {
       toast.error("Failed to update doubt status");
+    }
+  };
+
+  const handleEditDoubt = (doubt) => {
+    setEditingDoubt(doubt);
+    setEditDoubtForm({
+      title: doubt.title,
+      description: doubt.description,
+      screenshot: doubt.screenshot || "",
+    });
+  };
+
+  const handleUpdateDoubt = async () => {
+    if (!editDoubtForm.title.trim() || !editDoubtForm.description.trim()) {
+      toast.error("Title and description are required");
+      return;
+    }
+
+    try {
+      await apiInstance.patch(`/doubts/${editingDoubt._id}`, editDoubtForm);
+      toast.success("Doubt updated successfully");
+      setEditingDoubt(null);
+      setEditDoubtForm({ title: "", description: "", screenshot: "" });
+      fetchDoubts();
+      // Update selected doubt if it's currently open
+      if (selectedDoubt && selectedDoubt._id === editingDoubt._id) {
+        setSelectedDoubt({ ...selectedDoubt, ...editDoubtForm });
+      }
+    } catch (err) {
+      console.error("Update error:", err);
+      toast.error("Failed to update doubt");
+    }
+  };
+
+  const handleDeleteDoubt = async (doubtId) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this doubt? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await apiInstance.delete(`/doubts/${doubtId}`);
+      toast.success("Doubt deleted successfully");
+      fetchDoubts();
+      // Close modal if the deleted doubt was currently selected
+      if (selectedDoubt && selectedDoubt._id === doubtId) {
+        setSelectedDoubt(null);
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      toast.error("Failed to delete doubt");
     }
   };
 
@@ -332,12 +392,21 @@ const StudentDashboard = () => {
                     <span>📚 {doubt.subject || "General"}</span>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => handleOpenOverlay(doubt)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                      className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
                     >
                       View Details
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditDoubt(doubt);
+                      }}
+                      className="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-xs sm:text-sm"
+                    >
+                      ✏️ Edit
                     </button>
                     <button
                       onClick={async (e) => {
@@ -356,13 +425,22 @@ const StudentDashboard = () => {
                           toast.error("Failed to update doubt status");
                         }
                       }}
-                      className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                      className={`px-3 py-2 rounded-lg transition-colors text-xs sm:text-sm ${
                         doubt.status === "resolved"
                           ? "bg-orange-600 hover:bg-orange-700 text-white"
                           : "bg-green-600 hover:bg-green-700 text-white"
                       }`}
                     >
-                      {doubt.status === "resolved" ? "Reopen" : "Mark Resolved"}
+                      {doubt.status === "resolved" ? "Reopen" : "Resolve"}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteDoubt(doubt._id);
+                      }}
+                      className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs sm:text-sm"
+                    >
+                      🗑️ Delete
                     </button>
                   </div>
                 </div>
@@ -514,10 +592,16 @@ const StudentDashboard = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3 pt-4 border-t">
+                <div className="flex flex-wrap gap-3 pt-4 border-t">
+                  <button
+                    onClick={() => handleEditDoubt(selectedDoubt)}
+                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
+                  >
+                    ✏️ Edit Doubt
+                  </button>
                   <button
                     onClick={handleToggleResolve}
-                    className={`px-6 py-2 rounded-lg transition-colors ${
+                    className={`px-4 py-2 rounded-lg transition-colors text-sm ${
                       selectedDoubt.status === "resolved"
                         ? "bg-orange-600 hover:bg-orange-700 text-white"
                         : "bg-green-600 hover:bg-green-700 text-white"
@@ -528,10 +612,118 @@ const StudentDashboard = () => {
                       : "Mark as Resolved"}
                   </button>
                   <button
+                    onClick={() => handleDeleteDoubt(selectedDoubt._id)}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                  >
+                    🗑️ Delete Doubt
+                  </button>
+                  <button
                     onClick={() => setSelectedDoubt(null)}
-                    className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm"
                   >
                     Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Doubt Modal */}
+        {editingDoubt && (
+          <div className="fixed inset-0 backdrop-blur-sm bg-black/20 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
+                <h2 className="text-xl font-bold text-gray-800">Edit Doubt</h2>
+                <button
+                  onClick={() => {
+                    setEditingDoubt(null);
+                    setEditDoubtForm({
+                      title: "",
+                      description: "",
+                      screenshot: "",
+                    });
+                  }}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  ✖
+                </button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Title *
+                  </label>
+                  <input
+                    type="text"
+                    value={editDoubtForm.title}
+                    onChange={(e) =>
+                      setEditDoubtForm({
+                        ...editDoubtForm,
+                        title: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter a clear, concise title for your doubt"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description *
+                  </label>
+                  <textarea
+                    value={editDoubtForm.description}
+                    onChange={(e) =>
+                      setEditDoubtForm({
+                        ...editDoubtForm,
+                        description: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    rows="6"
+                    placeholder="Describe your problem in detail..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Screenshot URL (Optional)
+                  </label>
+                  <input
+                    type="url"
+                    value={editDoubtForm.screenshot}
+                    onChange={(e) =>
+                      setEditDoubtForm({
+                        ...editDoubtForm,
+                        screenshot: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="https://example.com/screenshot.png"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t">
+                  <button
+                    onClick={handleUpdateDoubt}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  >
+                    💾 Update Doubt
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingDoubt(null);
+                      setEditDoubtForm({
+                        title: "",
+                        description: "",
+                        screenshot: "",
+                      });
+                    }}
+                    className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                  >
+                    Cancel
                   </button>
                 </div>
               </div>
