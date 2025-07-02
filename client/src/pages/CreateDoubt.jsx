@@ -10,21 +10,43 @@ const CreateDoubt = () => {
   const [form, setForm] = useState({
     title: "",
     description: "",
-    screenshot: "",
+    screenshot: null, // store File object
   });
 
+  const [previewUrl, setPreviewUrl] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === "screenshot") {
+      const file = files[0];
+      setForm({ ...form, screenshot: file });
+      setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setForm({ ...form, [name]: value });
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      await apiInstance.post("/doubts", form);
+      const formData = new FormData();
+      formData.append("title", form.title);
+      formData.append("description", form.description);
+      if (form.screenshot) {
+        formData.append("screenshot", form.screenshot);
+      }
+
+      await apiInstance.post("/doubts", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       toast.success("Doubt posted successfully!");
-      navigate("/dashboard/student"); // redirect if needed
+      navigate("/dashboard/student");
     } catch (err) {
       toast.error(err.response?.data?.msg || "Failed to post doubt");
     } finally {
@@ -34,7 +56,6 @@ const CreateDoubt = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex relative">
-      {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -42,15 +63,13 @@ const CreateDoubt = () => {
         />
       )}
 
-      {/* Sidebar */}
       <aside
-        className={`
-        fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white border-r shadow-sm transform transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-      `}
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white border-r shadow-sm transform transition-transform duration-300 ease-in-out
+        ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }`}
       >
         <div className="p-6">
-          {/* Mobile Close Button */}
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => navigate(-1)}
@@ -77,9 +96,7 @@ const CreateDoubt = () => {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 min-w-0 lg:ml-0">
-        {/* Mobile Header */}
         <div className="lg:hidden bg-white border-b px-4 py-3 flex items-center justify-between">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -100,10 +117,9 @@ const CreateDoubt = () => {
             </svg>
           </button>
           <h1 className="text-lg font-semibold text-gray-800">Create Doubt</h1>
-          <div className="w-6" /> {/* Spacer for centering */}
+          <div className="w-6" />
         </div>
 
-        {/* Form Content */}
         <div className="px-4 lg:px-8 py-4 lg:py-6">
           <div className="max-w-4xl mx-auto">
             <h1 className="hidden lg:block text-2xl font-bold text-gray-800 mb-6">
@@ -146,19 +162,24 @@ const CreateDoubt = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Screenshot URL (Optional)
+                  Upload Screenshot
                 </label>
                 <input
-                  type="url"
+                  type="file"
                   name="screenshot"
-                  value={form.screenshot}
-                  placeholder="https://example.com/screenshot.png"
+                  accept="image/*"
                   className="w-full border border-gray-300 rounded-lg px-3 lg:px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm lg:text-base"
                   onChange={handleChange}
                 />
+                {previewUrl && (
+                  <img
+                    src={previewUrl}
+                    alt="Screenshot Preview"
+                    className="mt-3 h-40 object-contain rounded border"
+                  />
+                )}
                 <p className="text-xs text-gray-500 mt-1">
-                  Upload your screenshot to an image hosting service and paste
-                  the URL here
+                  Only image files are allowed.
                 </p>
               </div>
 

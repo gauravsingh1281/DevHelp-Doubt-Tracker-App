@@ -427,24 +427,13 @@ const StudentDashboard = () => {
           </div>
 
           {/* Desktop Floating Action Button */}
+
           <button
-            onClick={() => navigate("/ask-doubt")}
-            className="hidden lg:flex fixed bottom-8 right-8 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 z-40"
+            onClick={() => navigate("/doubts/create")}
             title="Ask a new doubt"
+            className="hidden lg:flex fixed bottom-6 right-6 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer"
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
+            Ask a Doubt
           </button>
         </div>
 

@@ -1,20 +1,35 @@
 import Doubt from "../models/Doubt.js";
 import Comment from "../models/Comment.js";
+import imagekit from "../utils/imagekit.js";
 
 export const createDoubt = async (req, res) => {
   try {
-    const { title, description, screenshot } = req.body;
+    const { title, description } = req.body;
+    let screenshotUrl = null;
+    let screenshotFileId = null;
+
+    if (req.file) {
+      const uploaded = await imagekit.upload({
+        file: req.file.buffer,
+        fileName: req.file.originalname,
+        folder: "/doubt-screenshots",
+      });
+      screenshotUrl = uploaded.url;
+      screenshotFileId = uploaded.fileId;
+    }
 
     const doubt = new Doubt({
       title,
       description,
-      screenshot,
+      screenshot: screenshotUrl,
+      screenshotFileId,
       student: req.user.id,
     });
 
     await doubt.save();
     res.status(201).json(doubt);
   } catch (err) {
+    console.error("Create Doubt Error:", err);
     res.status(500).json({ msg: "Failed to create doubt", error: err.message });
   }
 };
