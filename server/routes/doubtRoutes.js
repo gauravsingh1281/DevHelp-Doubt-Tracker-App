@@ -10,11 +10,12 @@ import {
 } from "../controllers/doubtController.js";
 
 import { protect, isStudent, isMentor } from "../middlewares/authMiddleware.js";
+import { createDoubtLimiter } from "../middlewares/rateLimiters.js";
 
 const router = express.Router();
 
 // Student Routes
-router.post("/", protect, isStudent, createDoubt);
+router.post("/", protect, isStudent, createDoubtLimiter, createDoubt);
 router.get("/my", protect, isStudent, getMyDoubts);
 router.patch("/:id", protect, isStudent, updateDoubt);
 router.delete("/:id", protect, isStudent, deleteDoubt);
