@@ -151,39 +151,46 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
     const isReply = depth > 0;
 
     return (
-      <div key={comment._id} className={`${isReply ? "ml-8 mt-3" : "mt-3"}`}>
+      <div
+        key={comment._id}
+        className={`${isReply ? "ml-4 lg:ml-8 mt-3" : "mt-3"}`}
+      >
         <div
-          className={`p-4 rounded-lg border-l-4 ${
+          className={`p-3 lg:p-4 rounded-lg border-l-4 ${
             isReply
               ? "bg-blue-50 border-l-blue-400 border border-blue-200"
               : "bg-gray-50 border-l-gray-400 border border-gray-200"
           }`}
         >
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
             {/* Comment/Reply Type Indicator */}
-            <span
-              className={`text-xs px-2 py-1 rounded-full font-medium ${
-                isReply
-                  ? "bg-blue-200 text-blue-800"
-                  : "bg-gray-200 text-gray-700"
-              }`}
-            >
-              {isReply ? "↪️ Reply" : "💬 Comment"}
-            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span
+                className={`text-xs px-2 py-1 rounded-full font-medium ${
+                  isReply
+                    ? "bg-blue-200 text-blue-800"
+                    : "bg-gray-200 text-gray-700"
+                }`}
+              >
+                {isReply ? "↪️ Reply" : "💬 Comment"}
+              </span>
 
-            <strong className="text-gray-800">{comment.author.name}</strong>
-            <span
-              className={`text-xs px-2 py-1 rounded-full ${
-                comment.author.role === "mentor"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-purple-100 text-purple-700"
-              }`}
-            >
-              {comment.author.role === "mentor" ? "🎓 Mentor" : "👤 Student"}
-            </span>
-            <span className="text-gray-400 text-xs">
-              {new Date(comment.createdAt).toLocaleString()}
-            </span>
+              <strong className="text-gray-800 text-sm lg:text-base break-words">
+                {comment.author.name}
+              </strong>
+              <span
+                className={`text-xs px-2 py-1 rounded-full ${
+                  comment.author.role === "mentor"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-purple-100 text-purple-700"
+                }`}
+              >
+                {comment.author.role === "mentor" ? "🎓 Mentor" : "👤 Student"}
+              </span>
+              <span className="text-gray-400 text-xs whitespace-nowrap">
+                {new Date(comment.createdAt).toLocaleDateString()}
+              </span>
+            </div>
           </div>
 
           {/* Comment Text or Edit Form */}
@@ -225,30 +232,30 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-3 text-xs mt-3 pt-2 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row gap-2 lg:gap-3 text-xs mt-3 pt-2 border-t border-gray-200">
             {canReply && (
               <button
                 onClick={() => setReplyToCommentId(comment._id)}
-                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium cursor-pointer transition-colors"
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium cursor-pointer transition-colors text-left"
               >
                 ↪️ Reply to {isReply ? "reply" : "comment"}
               </button>
             )}
             {isCurrentUser && !isEditing && (
-              <>
+              <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={() => startEditComment(comment)}
-                  className="flex items-center gap-1 text-orange-600 hover:text-orange-800 font-medium cursor-pointer transition-colors"
+                  className="flex items-center gap-1 text-orange-600 hover:text-orange-800 font-medium cursor-pointer transition-colors text-left"
                 >
                   ✏️ Edit {isReply ? "reply" : "comment"}
                 </button>
                 <button
                   onClick={() => handleDeleteComment(comment._id)}
-                  className="flex items-center gap-1 text-red-600 hover:text-red-800 font-medium cursor-pointer transition-colors"
+                  className="flex items-center gap-1 text-red-600 hover:text-red-800 font-medium cursor-pointer transition-colors text-left"
                 >
                   🗑️ Delete {isReply ? "reply" : "comment"}
                 </button>
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -308,41 +315,43 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
       {/* Add Comment Section */}
       <div className="border-t pt-4">
         {replyToCommentId && (
-          <div className="bg-blue-50 p-2 rounded mb-2 text-sm">
-            <span className="text-blue-600">
-              Replying to:{" "}
-              {(() => {
-                // Find the comment being replied to
-                const findComment = (comments, id) => {
-                  for (const comment of comments) {
-                    if (comment._id === id) return comment;
-                    if (comment.replies) {
-                      const found = findComment(comment.replies, id);
-                      if (found) return found;
+          <div className="bg-blue-50 p-3 rounded mb-3 text-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <span className="text-blue-600">
+                Replying to:{" "}
+                {(() => {
+                  // Find the comment being replied to
+                  const findComment = (comments, id) => {
+                    for (const comment of comments) {
+                      if (comment._id === id) return comment;
+                      if (comment.replies) {
+                        const found = findComment(comment.replies, id);
+                        if (found) return found;
+                      }
                     }
-                  }
-                  return null;
-                };
-                const replyTarget = findComment(comments, replyToCommentId);
-                return replyTarget?.author?.name || "comment";
-              })()}
-            </span>
-            <button
-              onClick={() => setReplyToCommentId(null)}
-              className="ml-2 text-red-500 hover:text-red-700 cursor-pointer"
-            >
-              ✖ Cancel
-            </button>
+                    return null;
+                  };
+                  const replyTarget = findComment(comments, replyToCommentId);
+                  return replyTarget?.author?.name || "comment";
+                })()}
+              </span>
+              <button
+                onClick={() => setReplyToCommentId(null)}
+                className="text-red-500 hover:text-red-700 cursor-pointer self-start sm:ml-auto"
+              >
+                ✖ Cancel Reply
+              </button>
+            </div>
           </div>
         )}
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-3">
           <textarea
             value={replyText}
             onChange={(e) => setReplyText(e.target.value)}
             placeholder={
               replyToCommentId ? "Write your reply..." : "Add a comment..."
             }
-            className="flex-1 border rounded px-3 py-2 text-sm resize-none"
+            className="flex-1 border rounded px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows="3"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
@@ -354,11 +363,14 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
           <button
             onClick={handleAddComment}
             disabled={!replyText.trim()}
-            className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed self-start cursor-pointer"
+            className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed self-start cursor-pointer transition-colors"
           >
-            {replyToCommentId ? "Reply" : "Comment"}
+            {replyToCommentId ? "Post Reply" : "Post Comment"}
           </button>
         </div>
+        <p className="text-xs text-gray-500 mt-2">
+          Press Enter to post, Shift+Enter for new line
+        </p>
       </div>
     </div>
   );
