@@ -86,18 +86,61 @@ export const getAllDoubts = async (req, res) => {
 export const updateDoubt = async (req, res) => {
   try {
     const { id } = req.params;
+    const { title, description, existingScreenshot } = req.body;
 
-    const updated = await Doubt.findOneAndUpdate(
-      { _id: id, student: req.user.id },
-      { ...req.body, updatedAt: Date.now() },
-      { new: true }
-    );
+    const existingDoubt = await Doubt.findOne({
+      _id: id,
+      student: req.user.id,
+    });
 
-    if (!updated)
+    if (!existingDoubt) {
       return res.status(404).json({ msg: "Not found or unauthorized" });
+    }
 
-    res.json(updated);
+    let newScreenshotUrl = existingDoubt.screenshot;
+    let newScreenshotFileId = existingDoubt.screenshotFileId;
+
+    // Handle new file upload
+    if (req.file) {
+      // Delete old screenshot from ImageKit if it exists
+      if (existingDoubt.screenshotFileId) {
+        try {
+          await imagekit.deleteFile(existingDoubt.screenshotFileId);
+        } catch (deleteErr) {
+          console.warn("Failed to delete old screenshot:", deleteErr);
+        }
+      }
+
+      // Upload new screenshot
+      const uploaded = await imagekit.upload({
+        file: req.file.buffer,
+        fileName: req.file.originalname,
+        folder: "/doubt-screenshots",
+      });
+      newScreenshotUrl = uploaded.url;
+      newScreenshotFileId = uploaded.fileId;
+    } else if (!existingScreenshot && existingDoubt.screenshotFileId) {
+      // If no existing screenshot is provided and no new file, remove the screenshot
+      try {
+        await imagekit.deleteFile(existingDoubt.screenshotFileId);
+      } catch (deleteErr) {
+        console.warn("Failed to delete screenshot:", deleteErr);
+      }
+      newScreenshotUrl = null;
+      newScreenshotFileId = null;
+    }
+
+    existingDoubt.title = title || existingDoubt.title;
+    existingDoubt.description = description || existingDoubt.description;
+    existingDoubt.screenshot = newScreenshotUrl;
+    existingDoubt.screenshotFileId = newScreenshotFileId;
+    existingDoubt.updatedAt = Date.now();
+
+    await existingDoubt.save();
+
+    res.json(existingDoubt);
   } catch (err) {
+    console.error("Update doubt error:", err);
     res.status(500).json({ msg: "Update failed", error: err.message });
   }
 };
@@ -106,16 +149,22 @@ export const deleteDoubt = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const deleted = await Doubt.findOneAndDelete({
-      _id: id,
-      student: req.user.id,
-    });
+    const doubt = await Doubt.findOne({ _id: id, student: req.user.id });
 
-    if (!deleted)
+    if (!doubt) {
       return res.status(404).json({ msg: "Not found or unauthorized" });
+    }
+
+    // If image exists, delete from ImageKit
+    if (doubt.screenshotFileId) {
+      await imagekit.deleteFile(doubt.screenshotFileId);
+    }
+
+    await doubt.deleteOne();
 
     res.json({ msg: "Doubt deleted successfully" });
   } catch (err) {
+    console.error("Delete Doubt Error:", err);
     res.status(500).json({ msg: "Delete failed", error: err.message });
   }
 };

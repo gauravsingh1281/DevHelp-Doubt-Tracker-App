@@ -15,8 +15,10 @@ const StudentDashboard = () => {
   const [editDoubtForm, setEditDoubtForm] = useState({
     title: "",
     description: "",
-    screenshot: "",
+    screenshot: null, // File object for new uploads
+    existingScreenshot: "", // URL for existing screenshot
   });
+  const [editPreviewUrl, setEditPreviewUrl] = useState("");
   const [commentCounts, setCommentCounts] = useState({});
   const [refreshing, setRefreshing] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -112,8 +114,32 @@ const StudentDashboard = () => {
     setEditDoubtForm({
       title: doubt.title,
       description: doubt.description,
-      screenshot: doubt.screenshot || "",
+      screenshot: null,
+      existingScreenshot: doubt.screenshot || "",
     });
+    setEditPreviewUrl(doubt.screenshot || "");
+  };
+
+  const handleEditFormChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === "screenshot") {
+      const file = files[0];
+      setEditDoubtForm({ ...editDoubtForm, screenshot: file });
+      if (file) {
+        setEditPreviewUrl(URL.createObjectURL(file));
+      }
+    } else {
+      setEditDoubtForm({ ...editDoubtForm, [name]: value });
+    }
+  };
+
+  const handleRemoveEditScreenshot = () => {
+    setEditDoubtForm({
+      ...editDoubtForm,
+      screenshot: null,
+      existingScreenshot: "",
+    });
+    setEditPreviewUrl("");
   };
 
   const handleUpdateDoubt = async () => {
@@ -123,14 +149,47 @@ const StudentDashboard = () => {
     }
 
     try {
-      await apiInstance.patch(`/doubts/${editingDoubt._id}`, editDoubtForm);
+      const formData = new FormData();
+      formData.append("title", editDoubtForm.title);
+      formData.append("description", editDoubtForm.description);
+
+      // If a new screenshot file is selected, append it
+      if (editDoubtForm.screenshot) {
+        formData.append("screenshot", editDoubtForm.screenshot);
+      } else if (editDoubtForm.existingScreenshot) {
+        // Keep existing screenshot URL if no new file is selected
+        formData.append("existingScreenshot", editDoubtForm.existingScreenshot);
+      }
+
+      await apiInstance.patch(`/doubts/${editingDoubt._id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       toast.success("Doubt updated successfully");
       setEditingDoubt(null);
-      setEditDoubtForm({ title: "", description: "", screenshot: "" });
+      setEditDoubtForm({
+        title: "",
+        description: "",
+        screenshot: null,
+        existingScreenshot: "",
+      });
+      setEditPreviewUrl("");
       fetchDoubts();
+
       // Update selected doubt if it's currently open
       if (selectedDoubt && selectedDoubt._id === editingDoubt._id) {
-        setSelectedDoubt({ ...selectedDoubt, ...editDoubtForm });
+        const updatedDoubt = {
+          ...selectedDoubt,
+          title: editDoubtForm.title,
+          description: editDoubtForm.description,
+          // Keep existing screenshot unless a new one was uploaded
+          screenshot: editDoubtForm.screenshot
+            ? editPreviewUrl
+            : editDoubtForm.existingScreenshot,
+        };
+        setSelectedDoubt(updatedDoubt);
       }
     } catch (err) {
       console.error("Update error:", err);
@@ -586,8 +645,10 @@ const StudentDashboard = () => {
                     setEditDoubtForm({
                       title: "",
                       description: "",
-                      screenshot: "",
+                      screenshot: null,
+                      existingScreenshot: "",
                     });
+                    setEditPreviewUrl("");
                   }}
                   className="text-gray-500 hover:text-gray-700 text-2xl cursor-pointer p-1"
                 >
@@ -602,13 +663,9 @@ const StudentDashboard = () => {
                   </label>
                   <input
                     type="text"
+                    name="title"
                     value={editDoubtForm.title}
-                    onChange={(e) =>
-                      setEditDoubtForm({
-                        ...editDoubtForm,
-                        title: e.target.value,
-                      })
-                    }
+                    onChange={handleEditFormChange}
                     className="w-full border border-gray-300 rounded-lg px-3 lg:px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm lg:text-base"
                     placeholder="Enter a clear, concise title for your doubt"
                   />
@@ -619,13 +676,9 @@ const StudentDashboard = () => {
                     Description *
                   </label>
                   <textarea
+                    name="description"
                     value={editDoubtForm.description}
-                    onChange={(e) =>
-                      setEditDoubtForm({
-                        ...editDoubtForm,
-                        description: e.target.value,
-                      })
-                    }
+                    onChange={handleEditFormChange}
                     className="w-full border border-gray-300 rounded-lg px-3 lg:px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm lg:text-base"
                     rows="6"
                     placeholder="Describe your problem in detail..."
@@ -634,20 +687,48 @@ const StudentDashboard = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Screenshot URL (Optional)
+                    Screenshot (Optional)
                   </label>
+
+                  {/* Current/Preview Image */}
+                  {(editPreviewUrl || editDoubtForm.existingScreenshot) && (
+                    <div className="mb-3">
+                      <div className="relative inline-block">
+                        <img
+                          src={
+                            editPreviewUrl || editDoubtForm.existingScreenshot
+                          }
+                          alt="Screenshot preview"
+                          className="max-w-full sm:max-w-sm h-32 object-contain border rounded-lg shadow-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleRemoveEditScreenshot}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                        >
+                          ✖
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {editPreviewUrl && editDoubtForm.screenshot
+                          ? "New screenshot selected"
+                          : "Current screenshot"}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* File Input */}
                   <input
-                    type="url"
-                    value={editDoubtForm.screenshot}
-                    onChange={(e) =>
-                      setEditDoubtForm({
-                        ...editDoubtForm,
-                        screenshot: e.target.value,
-                      })
-                    }
+                    type="file"
+                    name="screenshot"
+                    accept="image/*"
+                    onChange={handleEditFormChange}
                     className="w-full border border-gray-300 rounded-lg px-3 lg:px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm lg:text-base"
-                    placeholder="https://example.com/screenshot.png"
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Select a new image to replace the current screenshot, or
+                    leave empty to keep existing
+                  </p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
@@ -663,8 +744,10 @@ const StudentDashboard = () => {
                       setEditDoubtForm({
                         title: "",
                         description: "",
-                        screenshot: "",
+                        screenshot: null,
+                        existingScreenshot: "",
                       });
+                      setEditPreviewUrl("");
                     }}
                     className="px-4 lg:px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer text-sm lg:text-base"
                   >

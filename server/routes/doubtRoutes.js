@@ -26,7 +26,13 @@ router.post(
   createDoubt
 );
 router.get("/my", protect, isStudent, getMyDoubts);
-router.patch("/:id", protect, isStudent, updateDoubt);
+router.patch(
+  "/:id",
+  protect,
+  isStudent,
+  upload.single("screenshot"),
+  updateDoubt
+);
 router.delete("/:id", protect, isStudent, deleteDoubt);
 router.patch("/:id/resolve", protect, isStudent, markDoubtResolved);
 
