@@ -12,7 +12,7 @@ const Register = () => {
     password: "",
     role: "student",
   });
-  const [loading, setLoading] = useState(false); // ✅ loader state
+  const [loading, setLoading] = useState(false); // loader state
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -56,7 +56,7 @@ const Register = () => {
     if (!isValid) return;
 
     try {
-      setLoading(true); // ✅ start loader
+      setLoading(true); // start loader
       await apiInstance.post("/auth/register", form);
       toast.success("Registered successfully. Now login.");
       navigate("/login");
@@ -71,7 +71,7 @@ const Register = () => {
     } catch (err) {
       toast.error(err.response?.data?.msg || "Registration failed");
     } finally {
-      setLoading(false); // ✅ stop loader
+      setLoading(false); // stop loader
     }
   };
 

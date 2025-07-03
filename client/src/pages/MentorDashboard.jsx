@@ -5,7 +5,6 @@ import { FaCode, FaRegClock, FaRegCommentDots, FaUser } from "react-icons/fa";
 import { FiMail, FiRefreshCcw } from "react-icons/fi";
 import MiniLoader from "../components/MiniLoader";
 
-// Lazy load MentorComments component
 const MentorComments = lazy(() => import("../components/MentorComments"));
 
 const MentorDashboard = () => {

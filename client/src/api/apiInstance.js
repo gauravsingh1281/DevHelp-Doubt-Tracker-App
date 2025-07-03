@@ -1,6 +1,5 @@
 import axios from "axios";
 
-// Create base Axios instance
 const apiInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
 });
@@ -20,7 +19,6 @@ apiInstance.interceptors.request.use(
 // Response interceptor to handle logout scenarios
 apiInstance.interceptors.response.use(
   (response) => {
-    // Always allow successful responses to pass through
     return response;
   },
   (error) => {

@@ -2,12 +2,11 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 
-// Load environment variables
 dotenv.config();
 
 import connectDB from "./config/db.js";
 
-// Import Routes
+// routes
 import authRoutes from "./routes/authRoutes.js";
 import doubtRoutes from "./routes/doubtRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";

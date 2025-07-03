@@ -3,7 +3,6 @@ import { useContext, lazy, Suspense } from "react";
 import { AuthContext } from "../context/AuthContext";
 import MiniLoader from "../components/MiniLoader";
 
-// Lazy load NotAuthorized component
 const NotAuthorized = lazy(() => import("../pages/NotAuthorized"));
 
 const RoleProtectedRoute = ({ allowedRoles = [], children }) => {

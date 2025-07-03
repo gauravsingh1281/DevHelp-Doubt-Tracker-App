@@ -26,7 +26,7 @@ const DashboardHeader = () => {
   }, []);
 
   const handleLogout = () => {
-    logout(); // This already dismisses toasts in AuthContext
+    logout();
     navigate("/login");
     setDropdownOpen(false);
   };
