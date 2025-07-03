@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback, useContext } from "react";
 import { toast } from "react-toastify";
 import apiInstance from "../api/apiInstance";
 import { AuthContext } from "../context/AuthContext";
+import { MdDelete, MdModeEdit } from "react-icons/md";
+import { FaRegCommentDots, FaReply } from "react-icons/fa";
 
 // Recursive function to count all comments and nested replies
 const countCommentsRecursively = (comments) => {
@@ -147,29 +149,37 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
             {/* Comment/Reply Type Indicator */}
             <div className="flex items-center gap-2 flex-wrap">
               <span
-                className={`text-xs px-2 py-1 rounded-full font-medium ${
+                className={`text-xs px-3 py-[3px] rounded-full font-medium ${
                   isReply
                     ? "bg-blue-200 text-blue-800"
                     : "bg-gray-200 text-gray-700"
                 }`}
               >
-                {isReply ? "↪️ Reply" : "💬 Comment"}
+                {isReply ? (
+                  <span>
+                    <FaReply className="inline-block mr-1" /> Reply
+                  </span>
+                ) : (
+                  <span>
+                    <FaRegCommentDots className="inline-block mr-1" /> Comment
+                  </span>
+                )}
               </span>
 
               <strong className="text-gray-800 text-sm lg:text-base break-words">
                 {comment.author.name}
               </strong>
               <span
-                className={`text-xs px-2 py-1 rounded-full ${
+                className={`text-xs px-3 py-[3px] rounded-lg  ${
                   comment.author.role === "mentor"
-                    ? "bg-green-100 text-green-700"
+                    ? "bg-green-200 text-green-700"
                     : "bg-purple-100 text-purple-700"
                 }`}
               >
                 {comment.author.role === "mentor" ? "🎓 Mentor" : "👤 Student"}
               </span>
-              <span className="text-gray-400 text-xs whitespace-nowrap">
-                {new Date(comment.createdAt).toLocaleDateString()}
+              <span className="text-gray-800 text-xs whitespace-nowrap">
+                {new Date(comment.createdAt).toLocaleString()}
               </span>
             </div>
           </div>
@@ -192,13 +202,13 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
                   onClick={() => handleEditComment(comment._id, editText)}
                   className="text-xs bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 cursor-pointer transition-colors"
                 >
-                  💾 Save {isReply ? "Reply" : "Comment"}
+                  Save {isReply ? "Reply" : "Comment"}
                 </button>
                 <button
                   onClick={cancelEdit}
                   className="text-xs bg-gray-500 text-white px-3 py-1 rounded-lg hover:bg-gray-600 cursor-pointer transition-colors"
                 >
-                  ❌ Cancel
+                  Cancel
                 </button>
               </div>
             </div>
@@ -219,22 +229,22 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
                 onClick={() => setReplyToCommentId(comment._id)}
                 className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium cursor-pointer transition-colors text-left"
               >
-                ↪️ Reply to {isReply ? "reply" : "comment"}
+                <FaReply /> Reply to {isReply ? "reply" : "comment"}
               </button>
             )}
             {isCurrentUser && !isEditing && (
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 ">
                 <button
                   onClick={() => startEditComment(comment)}
-                  className="flex items-center gap-1 text-orange-600 hover:text-orange-800 font-medium cursor-pointer transition-colors text-left"
+                  className="flex items-center gap-1 text-black  font-medium cursor-pointer transition-colors text-left"
                 >
-                  ✏️ Edit {isReply ? "reply" : "comment"}
+                  <MdModeEdit /> Edit {isReply ? "reply" : "comment"}
                 </button>
                 <button
                   onClick={() => handleDeleteComment(comment._id)}
-                  className="flex items-center gap-1 text-red-600 hover:text-red-800 font-medium cursor-pointer transition-colors text-left"
+                  className="flex items-center gap-1 text-red-500  font-medium cursor-pointer transition-colors text-left"
                 >
-                  🗑️ Delete {isReply ? "reply" : "comment"}
+                  <MdDelete /> Delete {isReply ? "reply" : "comment"}
                 </button>
               </div>
             )}
@@ -313,7 +323,7 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
                 onClick={() => setReplyToCommentId(null)}
                 className="text-red-500 hover:text-red-700 cursor-pointer self-start sm:ml-auto"
               >
-                ✖ Cancel Reply
+                Cancel Reply
               </button>
             </div>
           </div>
