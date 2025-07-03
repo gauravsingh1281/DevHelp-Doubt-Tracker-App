@@ -14,7 +14,7 @@ export default function Home() {
           </h1>
           <button
             className="py-2 px-3 md:py-2.5 md:px-4 text-lg bg-black text-white rounded-md cursor-pointer active:scale-[94%] transition-all duration-200 ease-in font-OpenSans"
-            onClick={() => navigate("/signup")}
+            onClick={() => navigate("/register")}
           >
             Try DevHelp. It's free.
           </button>
