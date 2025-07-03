@@ -1,4 +1,5 @@
 import { createContext, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 export const AuthContext = createContext();
 
@@ -22,10 +23,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    // Dismiss all active toasts first
+    toast.dismiss();
+
     setUser(null);
     setToken("");
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
+    // Clear any pending toasts after a brief delay
+    setTimeout(() => {
+      toast.dismiss();
+    }, 100);
   };
 
   return (

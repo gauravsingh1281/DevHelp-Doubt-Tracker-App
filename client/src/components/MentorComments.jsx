@@ -5,6 +5,14 @@ import { AuthContext } from "../context/AuthContext";
 import { MdDelete, MdModeEdit } from "react-icons/md";
 import { FaRegCommentDots, FaReply } from "react-icons/fa";
 
+// Safe toast function that only shows if user is logged in
+const safeToast = (type, message, options = {}) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    toast[type](message, options);
+  }
+};
+
 // Recursive function to count all comments and nested replies
 const countCommentsRecursively = (comments) => {
   return comments.reduce((total, comment) => {
@@ -41,13 +49,14 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
       setComments([]); // Reset comments on error
 
       if (err.response?.status === 401) {
-        toast.error("Please login to view comments");
+        safeToast("error", "Please login to view comments");
       } else if (err.response?.status === 404) {
-        toast.error("Comments not found");
+        safeToast("error", "Comments not found");
       } else if (err.response?.status === 403) {
-        toast.error("Access denied");
+        safeToast("error", "Access denied");
       } else {
-        toast.error(
+        safeToast(
+          "error",
           "Failed to fetch comments: " +
             (err.response?.data?.msg || err.message)
         );
@@ -77,13 +86,13 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
         text: replyText,
         parentComment: replyToCommentId || null,
       });
-      toast.success("Comment added");
+      safeToast("success", "Comment added successfully!");
       setReplyText("");
       setReplyToCommentId(null);
       await fetchComments(); // Fetch updated comments
     } catch (err) {
       console.error("Error adding comment:", err);
-      toast.error("Failed to add comment");
+      safeToast("error", "Failed to add comment");
     }
   };
 
@@ -93,13 +102,13 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
       await apiInstance.patch(`/comments/${commentId}`, {
         text: newText,
       });
-      toast.success("Comment updated");
+      safeToast("success", "Comment updated successfully!");
       setEditingCommentId(null);
       setEditText("");
       await fetchComments(); // Fetch updated comments
     } catch (err) {
       console.error("Error editing comment:", err);
-      toast.error("Failed to edit comment");
+      safeToast("error", "Failed to edit comment");
     }
   };
 
@@ -109,11 +118,11 @@ const MentorComments = ({ doubtId, onCommentsUpdate }) => {
     }
     try {
       await apiInstance.delete(`/comments/${commentId}`);
-      toast.success("Comment deleted");
+      safeToast("success", "Comment deleted successfully!");
       await fetchComments(); // Fetch updated comments
     } catch (err) {
       console.error("Error deleting comment:", err);
-      toast.error("Failed to delete comment");
+      safeToast("error", "Failed to delete comment");
     }
   };
 

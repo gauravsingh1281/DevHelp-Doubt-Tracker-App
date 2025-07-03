@@ -48,29 +48,32 @@ const SuspenseLoader = ({
 
         {/* Loading bar */}
         <div className="mt-8 w-full bg-gray-200 rounded-full h-1">
-          <div
-            className="bg-[#F7418D] h-1 rounded-full animate-pulse"
-            style={{
-              width: "60%",
-              animation: "loading-bar 2s ease-in-out infinite",
-            }}
-          ></div>
+          <div className="bg-[#F7418D] h-1 rounded-full loading-bar"></div>
         </div>
       </div>
 
-      <style jsx>{`
-        @keyframes loading-bar {
-          0% {
-            width: 0%;
+      {/* Regular style tag instead of styled-jsx */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+          .loading-bar {
+            animation: loading-bar-animation 2s ease-in-out infinite;
           }
-          50% {
-            width: 60%;
+          
+          @keyframes loading-bar-animation {
+            0% {
+              width: 0%;
+            }
+            50% {
+              width: 60%;
+            }
+            100% {
+              width: 0%;
+            }
           }
-          100% {
-            width: 0%;
-          }
-        }
-      `}</style>
+        `,
+        }}
+      />
     </div>
   );
 };

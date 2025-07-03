@@ -4,7 +4,6 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { FaUser, FaKey, FaSignOutAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { toast } from "react-toastify";
 
 const DashboardHeader = () => {
   const navigate = useNavigate();
@@ -27,8 +26,7 @@ const DashboardHeader = () => {
   }, []);
 
   const handleLogout = () => {
-    logout();
-    toast.success("Logged out successfully");
+    logout(); // This already dismisses toasts in AuthContext
     navigate("/login");
     setDropdownOpen(false);
   };
