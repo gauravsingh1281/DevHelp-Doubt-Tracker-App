@@ -21,7 +21,6 @@ const PageUnderDev = lazy(() => import("../pages/PageUnderDev"));
 const AppRoutes = () => {
   const DashboardRedirect = () => {
     const { user } = useContext(AuthContext);
-    console.log(user);
     if (!user) return <Navigate to="/login" replace />;
     return user.role === "mentor" ? (
       <Navigate to="/dashboard/mentor" replace />
